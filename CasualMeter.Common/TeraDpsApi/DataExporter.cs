@@ -125,7 +125,8 @@ namespace CasualMeter.Common.TeraDpsApi
                 teradpsUser.playerClass = user.Class.ToString();
                 teradpsUser.playerName = user.Name;
                 teradpsUser.playerServer = SettingsHelper.Instance.BasicTeraData.Servers.GetServerName(user.Player.ServerId);
-                teradpsUser.playerAverageCritRate = Math.Round(100 * (double)filteredSkillog.Count(x => x.IsCritical && x.Damage>0)/filteredSkillog.Count, 1) + "";
+                teradpsUser.playerAverageCritRate = Math.Round(100 * (double)filteredSkillog.Count(x => x.IsCritical && x.Damage > 0) / filteredSkillog.Count(x => x.Damage > 0), 1) + "";
+                teradpsUser.healCrit = user.Player.IsHealer ? Math.Round(100 * (double)filteredSkillog.Count(x => x.IsCritical && x.Heal > 0) / filteredSkillog.Count(x => x.Heal > 0), 1) + "" : null;
                 teradpsUser.playerDps = TimeSpan.TicksPerSecond * damage / interval + "";
                 teradpsUser.playerTotalDamagePercentage = damage * 100 / totaldamage + "";
 
@@ -183,7 +184,7 @@ namespace CasualMeter.Common.TeraDpsApi
                 excelThread.Start();
             }
             if (string.IsNullOrEmpty(SettingsHelper.Instance.Settings.TeraDpsToken) || string.IsNullOrEmpty(SettingsHelper.Instance.Settings.TeraDpsUser) || !SettingsHelper.Instance.Settings.SiteExport) return;
-            string json = JsonConvert.SerializeObject(teradpsData);
+            string json = JsonConvert.SerializeObject(teradpsData, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
             var sendThread = new Thread(() => Send(entity, json, 3));
             sendThread.Start();
             //var jsonThread = new Thread(() => JsonExport(json));
