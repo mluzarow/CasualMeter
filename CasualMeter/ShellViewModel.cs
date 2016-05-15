@@ -147,10 +147,10 @@ namespace CasualMeter
             set { SetProperty(value, onChanged: e => SettingsHelper.Instance.Settings.SiteExport = value); }
         }
 
-        public bool Excel
+        public bool ExcelExport
         {
-            get { return GetProperty(getDefault: () => SettingsHelper.Instance.Settings.Excel); }
-            set { SetProperty(value, onChanged: e => SettingsHelper.Instance.Settings.Excel = value); }
+            get { return GetProperty(getDefault: () => SettingsHelper.Instance.Settings.ExcelExport); }
+            set { SetProperty(value, onChanged: e => SettingsHelper.Instance.Settings.ExcelExport = value); }
         }
 
         public bool ShowCompactView => UseCompactView || (SettingsHelper.Instance.Settings.ExpandedViewPlayerLimit > 0 
@@ -518,7 +518,7 @@ namespace CasualMeter
             }
         }
 
-        public void CheckUpdate(SkillResult skillResult)
+        private void CheckUpdate(SkillResult skillResult)
         {
             if (PartyOnly && !(_playerTracker.MyParty(skillResult.SourcePlayer) || _playerTracker.MyParty(skillResult.TargetPlayer))) return;
             if (SettingsHelper.Instance.Settings.InactivityResetDuration > 0

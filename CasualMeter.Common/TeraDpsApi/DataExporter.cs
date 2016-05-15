@@ -9,6 +9,7 @@ using Tera.Game.Messages;
 using Newtonsoft.Json;
 using Tera.Game;
 using System.Net.Http;
+using System.Threading.Tasks;
 using CasualMeter.Common.Entities;
 using CasualMeter.Common.Helpers;
 using Lunyx.Common.UI.Wpf;
@@ -24,7 +25,7 @@ namespace CasualMeter.Common.TeraDpsApi
             var entity = entityTracker.GetOrPlaceholder(despawnNpc.Npc) as NpcEntity;
             if (!(entity?.Info.Boss ?? false)) return;
 
-            if (!SettingsHelper.Instance.Settings.Excel && 
+            if (!SettingsHelper.Instance.Settings.ExcelExport && 
                 (string.IsNullOrEmpty(SettingsHelper.Instance.Settings.TeraDpsToken) 
                     || string.IsNullOrEmpty(SettingsHelper.Instance.Settings.TeraDpsUser)
                     || !SettingsHelper.Instance.Settings.SiteExport)
@@ -152,15 +153,13 @@ namespace CasualMeter.Common.TeraDpsApi
                 teradpsData.members.Add(teradpsUser);
             }
 
-            if (SettingsHelper.Instance.Settings.Excel)
+            if (SettingsHelper.Instance.Settings.ExcelExport)
             {
-                var excelThread = new Thread(() => ExcelExport.ExcelSave(teradpsData, teraData));
-                excelThread.Start();
+                Task.Run(() => ExcelExport.ExcelSave(teradpsData, teraData));
             }
             if (string.IsNullOrEmpty(SettingsHelper.Instance.Settings.TeraDpsToken) || string.IsNullOrEmpty(SettingsHelper.Instance.Settings.TeraDpsUser) || !SettingsHelper.Instance.Settings.SiteExport) return;
             string json = JsonConvert.SerializeObject(teradpsData, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
-            var sendThread = new Thread(() => Send(entity, json, 3));
-            sendThread.Start();
+            Task.Run(() => Send(entity, json, 3));
         }
 
         private static void Send(NpcEntity boss, string json, int numberTry)
