@@ -285,7 +285,7 @@ namespace CasualMeter
                 DamageTracker.FirstAttack != null && DamageTracker.LastAttack != null)
             {
                 DamageTracker.IsArchived = true;
-                DamageTracker.abnormals = _abnormalityStorage.Clone();
+                DamageTracker.Abnormals = _abnormalityStorage.Clone();
                 ArchivedDamageTrackers.Add(DamageTracker);
                 return;
             }
@@ -299,7 +299,7 @@ namespace CasualMeter
             {
                 OnlyBosses = OnlyBosses,
                 IgnoreOneshots = IgnoreOneshots,
-                abnormals = _abnormalityStorage
+                Abnormals = _abnormalityStorage
             };
         }
 
@@ -317,8 +317,8 @@ namespace CasualMeter
                     _abnormalityTracker.DeleteAbnormality(despawnNpc);
                     var npce = ent as NpcEntity;
                     if (npce.Info.Boss && despawnNpc.Dead && !DamageTracker.IsArchived)
-                    {
-                        if (DamageTracker.StatsByUser.SelectMany(x => x.SkillLog).Any(x => x.Target == npce)) //no need to do something if we didn't count any skill against this boss
+                    {   //no need to do something if we didn't count any skill against this boss
+                        if (DamageTracker.StatsByUser.SelectMany(x => x.SkillLog).Any(x => x.Target == npce))
                         {
                             DataExporter.ToTeraDpsApi(despawnNpc, DamageTracker, _entityTracker, _teraData);
                             DamageTracker.Name = npce.Info.Name; //Name encounter with the last dead boss
