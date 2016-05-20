@@ -172,9 +172,9 @@ namespace CasualMeter.Common.TeraDpsApi
             try {
                 using (var client = new HttpClient())
                 {
+                    client.Timeout = TimeSpan.FromSeconds(30);
                     client.DefaultRequestHeaders.Add("X-Auth-Token", SettingsHelper.Instance.Settings.TeraDpsToken);
                     client.DefaultRequestHeaders.Add("X-User-Id", SettingsHelper.Instance.Settings.TeraDpsUser);
-
 
                     var response = client.PostAsync("http://teradps.io/api/que", new StringContent(
                     json,
