@@ -163,7 +163,8 @@ namespace CasualMeter.Common.TeraDpsApi
 
         private static void Send(NpcEntity boss, string json, int numberTry)
         {
-            while (numberTry-- > 0)
+            var sent = false;
+            while (numberTry-- > 0 && !sent)
             {
                 try
                 {
@@ -178,7 +179,7 @@ namespace CasualMeter.Common.TeraDpsApi
                         Encoding.UTF8,
                         "application/json")
                         );
-
+                        sent = true;
                         var responseString = response.Result.Content.ReadAsStringAsync();
                         Debug.WriteLine(responseString.Result);
                         Dictionary<string, object> responseObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(responseString.Result);
