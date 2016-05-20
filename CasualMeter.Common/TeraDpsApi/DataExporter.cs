@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using Tera.DamageMeter;
-using System.Threading;
 using Tera.Game.Messages;
 using Newtonsoft.Json;
 using Tera.Game;
@@ -17,7 +16,7 @@ using Tera.Data;
 
 namespace CasualMeter.Common.TeraDpsApi
 {
-    public class DataExporter
+    public static class DataExporter
     {
         public static void ToTeraDpsApi(SDespawnNpc despawnNpc, DamageTracker damageTracker, EntityTracker entityTracker, TeraData teraData)
         {
@@ -164,42 +163,40 @@ namespace CasualMeter.Common.TeraDpsApi
 
         private static void Send(NpcEntity boss, string json, int numberTry)
         {
-            if(numberTry == 0)
+            while (numberTry-- > 0)
             {
-                Debug.WriteLine("API ERROR");
-                return;
-            }
-            try {
-                using (var client = new HttpClient())
+                try
                 {
-                    client.Timeout = TimeSpan.FromSeconds(30);
-                    client.DefaultRequestHeaders.Add("X-Auth-Token", SettingsHelper.Instance.Settings.TeraDpsToken);
-                    client.DefaultRequestHeaders.Add("X-User-Id", SettingsHelper.Instance.Settings.TeraDpsUser);
-
-                    var response = client.PostAsync("http://teradps.io/api/que", new StringContent(
-                    json,
-                    Encoding.UTF8,
-                    "application/json")
-                    );
-
-                    var responseString = response.Result.Content.ReadAsStringAsync();
-                    Debug.WriteLine(responseString.Result);
-                    Dictionary<string, object> responseObject = JsonConvert.DeserializeObject<Dictionary<string,object>>(responseString.Result);
-                    if (responseObject.ContainsKey("id"))
+                    using (var client = new HttpClient())
                     {
-                        Debug.WriteLine((string)responseObject["id"] + " " + boss.Info.Name);
-                    }
-                    else
-                    {
-                        Debug.WriteLine("!" + (string)responseObject["message"] +" "+ boss.Info.Name + " " +DateTime.Now.Ticks);
+                        client.Timeout = TimeSpan.FromSeconds(30);
+                        client.DefaultRequestHeaders.Add("X-Auth-Token", SettingsHelper.Instance.Settings.TeraDpsToken);
+                        client.DefaultRequestHeaders.Add("X-User-Id", SettingsHelper.Instance.Settings.TeraDpsUser);
+
+                        var response = client.PostAsync("http://teradps.io/api/que", new StringContent(
+                        json,
+                        Encoding.UTF8,
+                        "application/json")
+                        );
+
+                        var responseString = response.Result.Content.ReadAsStringAsync();
+                        Debug.WriteLine(responseString.Result);
+                        Dictionary<string, object> responseObject = JsonConvert.DeserializeObject<Dictionary<string, object>>(responseString.Result);
+                        if (responseObject.ContainsKey("id"))
+                        {
+                            Debug.WriteLine((string)responseObject["id"] + " " + boss.Info.Name);
+                        }
+                        else
+                        {
+                            Debug.WriteLine("!" + (string)responseObject["message"] + " " + boss.Info.Name + " " + DateTime.Now.Ticks);
+                        }
                     }
                 }
-            }
-            catch(Exception e)
-            {
-                Debug.WriteLine(e.Message);
-                Debug.WriteLine(e.StackTrace);
-                Send(boss, json, numberTry - 1);
+                catch (Exception e)
+                {
+                    Debug.WriteLine(e.Message);
+                    Debug.WriteLine(e.StackTrace);
+                }
             }
         }
     }
