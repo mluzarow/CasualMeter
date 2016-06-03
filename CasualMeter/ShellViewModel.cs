@@ -357,6 +357,8 @@ namespace CasualMeter
                 return;
             }
 
+            _entityTracker.Update(message);
+
             var changeHp = message as SCreatureChangeHp;
             if (changeHp != null)
             {
@@ -496,7 +498,6 @@ namespace CasualMeter
                 return;
             }
 
-            _entityTracker.Update(message);
             _playerTracker.UpdateParty(message);
 
             var sSpawnUser = message as SpawnUserServerMessage;
