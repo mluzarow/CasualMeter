@@ -33,19 +33,19 @@ namespace Tera.DamageMeter
         }
 
         public bool OnlyBosses {
-            get { return GetProperty<bool>(getDefault: () => false); }
+            get { return GetProperty(getDefault: () => false); }
             set { SetProperty(value); }
         }
 
         public bool IgnoreOneshots
         {
-            get { return GetProperty<bool>(getDefault: () => true); }
+            get { return GetProperty(getDefault: () => true); }
             set { SetProperty(value); }
         }
 
         public bool IsArchived
         {
-            get { return GetProperty<bool>(getDefault: () => false); }
+            get { return GetProperty(getDefault: () => false); }
             set { SetProperty(value); }
         }
 
@@ -75,13 +75,25 @@ namespace Tera.DamageMeter
 
         public TimeSpan Duration
         {
-            get { return GetProperty<TimeSpan>(getDefault: () => TimeSpan.Zero); }
+            get { return GetProperty(getDefault: () => TimeSpan.Zero); }
             set { SetProperty(value); }
         }
 
         public SkillStats TotalDealt
         {
             get { return GetProperty(getDefault: () => new SkillStats()); }
+            set { SetProperty(value); }
+        }
+
+        public NpcEntity PrimaryTarget
+        {
+            get { return GetProperty<NpcEntity>(); }
+            set { SetProperty(value); }
+        }
+
+        public bool IsPrimaryTargetDead
+        {
+            get { return GetProperty(getDefault: () => false); }
             set { SetProperty(value); }
         }
 
@@ -182,6 +194,5 @@ namespace Tera.DamageMeter
             var dps = damage / durationInSeconds;
             return (long)dps;
         }
-        public string Name { get; set; }
     }
 }

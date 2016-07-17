@@ -1,18 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Data;
-using System.Windows.Threading;
 using CasualMeter.Common.Conductors;
 using CasualMeter.Common.Conductors.Messages;
 using CasualMeter.Common.Formatters;
@@ -20,7 +12,6 @@ using CasualMeter.Common.Helpers;
 using CasualMeter.Common.UI.ViewModels;
 using CasualMeter.Common.TeraDpsApi;
 using GalaSoft.MvvmLight.CommandWpf;
-using log4net;
 using Lunyx.Common.UI.Wpf;
 using NetworkSniffer;
 using Tera;
@@ -43,13 +34,13 @@ namespace CasualMeter
         private AbnormalityTracker _abnormalityTracker;
         private CharmTracker _charmTracker;
         private readonly AbnormalityStorage _abnormalityStorage = new AbnormalityStorage();
-
-        private Stopwatch _inactivityTimer = new Stopwatch();
+        private readonly Stopwatch _inactivityTimer = new Stopwatch();
 
         public ShellViewModel()
         {
             CasualMessenger.Instance.Messenger.Register<PastePlayerStatsMessage>(this, PasteStats);
             CasualMessenger.Instance.Messenger.Register<ResetPlayerStatsMessage>(this, ResetDamageTracker);
+            CasualMessenger.Instance.Messenger.Register<ExportStatsMessage>(this, ExportStats);
         }
 
         #region Properties
@@ -297,11 +288,17 @@ namespace CasualMeter
         {
             if (Server == null) return;
 
-            bool saveEncounter = message != null && message.ShouldSaveCurrent;
+            var saveEncounter = message != null && message.ShouldSaveCurrent;
             if (saveEncounter && !DamageTracker.IsArchived && DamageTracker.StatsByUser.Count > 0 && 
                 DamageTracker.FirstAttack != null && DamageTracker.LastAttack != null)
             {
                 DamageTracker.IsArchived = true;
+                DamageTracker.PrimaryTarget = //get the target that was hit the most
+                    DamageTracker.StatsByUser.SelectMany(x => x.SkillLog)
+                        .GroupBy(s => s.Target)
+                        .OrderByDescending(g => g.Count())
+                        .Select(g => g.Key)
+                        .FirstOrDefault() as NpcEntity;
                 DamageTracker.Abnormals = _abnormalityStorage.Clone();
                 ArchivedDamageTrackers.Add(DamageTracker);
                 return;
@@ -318,6 +315,13 @@ namespace CasualMeter
                 IgnoreOneshots = IgnoreOneshots,
                 Abnormals = _abnormalityStorage
             };
+        }
+
+        private void ExportStats(ExportStatsMessage message)
+        {
+            if (!DamageTracker.IsArchived)
+                ResetDamageTracker(new ResetPlayerStatsMessage {ShouldSaveCurrent = true});
+            DataExporter.ToTeraDpsApi(message.ExportType, DamageTracker, _teraData);
         }
 
         private void HandleMessageReceived(Message obj)
@@ -337,9 +341,20 @@ namespace CasualMeter
                     {   //no need to do something if we didn't count any skill against this boss
                         if (DamageTracker.StatsByUser.SelectMany(x => x.SkillLog).Any(x => x.Target == npce))
                         {
-                            DataExporter.ToTeraDpsApi(despawnNpc, DamageTracker, _entityTracker, _teraData);
-                            DamageTracker.Name = npce.Info.Name; //Name encounter with the last dead boss
-                            if (AutosaveEncounters) CasualMessenger.Instance.ResetPlayerStats(true);
+                            DamageTracker.PrimaryTarget = npce; //Name encounter with the last dead boss
+                            DamageTracker.IsPrimaryTargetDead = despawnNpc.Dead;
+
+                            //determine type
+                            ExportType exportType = ExportType.None;
+                            if (SettingsHelper.Instance.Settings.ExcelExport)
+                                exportType = exportType | ExportType.Excel;
+                            if (SettingsHelper.Instance.Settings.SiteExport)
+                                exportType = exportType | ExportType.Upload;
+                            
+                            if (exportType != ExportType.None)
+                                DataExporter.ToTeraDpsApi(exportType, DamageTracker, _teraData);
+                            if (AutosaveEncounters)
+                                ResetDamageTracker(new ResetPlayerStatsMessage {ShouldSaveCurrent = true});
                         }
                     }
                 }
