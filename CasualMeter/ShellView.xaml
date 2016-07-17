@@ -56,7 +56,7 @@
             </CollectionViewSource>
         </Grid.Resources>
         <tb:TaskbarIcon IconSource="Resources/CasualMeter.ico"
-                        ToolTipText="Casual Meter"
+                        ToolTipText="{Binding ApplicationFullName}"
                         ContextMenu="{StaticResource MainMenu}"
                         DoubleClickCommand="{Binding ToggleIsPinnedCommand}">
         </tb:TaskbarIcon>

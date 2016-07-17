@@ -45,6 +45,8 @@ namespace CasualMeter
 
         #region Properties
 
+        public string ApplicationFullName => $"Casual Meter {SettingsHelper.Instance.Version}";
+
         public BasicTeraData BasicTeraData
         {
             get { return GetProperty(getDefault: () => SettingsHelper.Instance.BasicTeraData); }
