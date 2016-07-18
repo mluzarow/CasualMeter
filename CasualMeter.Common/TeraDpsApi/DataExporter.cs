@@ -70,7 +70,7 @@ namespace CasualMeter.Common.TeraDpsApi
             var partyDps = TimeSpan.TicksPerSecond * totaldamage / interval;
             var teradpsData = new EncounterBase
             {
-                encounterDateTime = damageTracker.FirstAttack?.Date ?? DateTime.Now,
+                encounterDateTime = damageTracker.FirstAttack?.Date.ToUniversalTime() ?? DateTime.UtcNow,
                 areaId = entity.Info.HuntingZoneId + "",
                 bossId = entity.Info.TemplateId + "",
                 fightDuration = seconds + "",

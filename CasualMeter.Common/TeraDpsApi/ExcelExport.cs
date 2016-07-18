@@ -29,7 +29,7 @@ namespace CasualMeter.Common.TeraDpsApi
                             ? SettingsHelper.Instance.GetDocumentsPath()
                             : SettingsHelper.Instance.GetTempFolderPath(), $"exports/{boss.Area.Replace(":", "-")}");
                 Directory.CreateDirectory(dir);
-                var fname = Path.Combine(dir, $"{boss.Name.Replace(":", "-")} {data.encounterDateTime.ToString("yyyy-MM-dd HH-mm-ss", CultureInfo.InvariantCulture)}.xlsx");
+                var fname = Path.Combine(dir, $"{boss.Name.Replace(":", "-")} {data.encounterDateTime.ToLocalTime().ToString("yyyy-MM-dd HH-mm-ss", CultureInfo.InvariantCulture)}.xlsx");
                 FileInfo file = new FileInfo(fname);
                 if (!file.Exists)
                 {
