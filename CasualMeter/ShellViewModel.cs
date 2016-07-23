@@ -295,7 +295,6 @@ namespace CasualMeter
                 DamageTracker.FirstAttack != null && DamageTracker.LastAttack != null)
             {
                 DamageTracker.IsArchived = true;
-                DamageTracker.UpdatePrimaryTarget();
                 DamageTracker.Abnormals = _abnormalityStorage.Clone();
                 ArchivedDamageTrackers.Add(DamageTracker);
                 return;
@@ -586,8 +585,6 @@ namespace CasualMeter
         private void PasteStats(PastePlayerStatsMessage obj)
         {
             if (DamageTracker == null) return;
-
-            DamageTracker.UpdatePrimaryTarget();
 
             var playerStatsSequence = DamageTracker.StatsByUser.OrderByDescending(playerStats => playerStats.Dealt.Damage).TakeWhile(x => x.Dealt.Damage > 0);
             const int maxLength = 300;

@@ -20,6 +20,8 @@ namespace Tera.DamageMeter
         private static readonly ILog Logger = LogManager.GetLogger
             (MethodBase.GetCurrentMethod().DeclaringType);
 
+        private readonly IDictionary<NpcEntity, long> _targetHitCount = new Dictionary<NpcEntity, long>();
+
         public ThreadSafeObservableCollection<PlayerInfo> StatsByUser
         {
             get { return GetProperty(getDefault: () => new ThreadSafeObservableCollection<PlayerInfo>()); }
@@ -97,15 +99,6 @@ namespace Tera.DamageMeter
             set { SetProperty(value); }
         }
 
-        public void UpdatePrimaryTarget()
-        {
-            PrimaryTarget = StatsByUser.SelectMany(x => x.SkillLog)
-                .GroupBy(s => s.Target)
-                .OrderByDescending(g => g.Count())
-                .Select(g => g.Key)
-                .FirstOrDefault() as NpcEntity;
-        }
-
         private PlayerInfo GetOrCreate(SkillResult skillResult)
         {
             NpcEntity npctarget = skillResult.Target as NpcEntity;
@@ -129,6 +122,16 @@ namespace Tera.DamageMeter
             {
                 playerStats = new PlayerInfo(player, this);
                 StatsByUser.Add(playerStats);
+            }
+
+            //update primary target if it's a mob
+            if (npctarget != null)
+            {
+                if (!_targetHitCount.ContainsKey(npctarget))
+                    _targetHitCount.Add(npctarget, 0);
+                _targetHitCount[npctarget]++;
+
+                PrimaryTarget = _targetHitCount.Aggregate((l, r) => l.Value > r.Value ? l : r).Key;
             }
             return playerStats;
         }
