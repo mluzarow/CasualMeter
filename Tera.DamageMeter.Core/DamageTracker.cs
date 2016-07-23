@@ -97,9 +97,22 @@ namespace Tera.DamageMeter
             set { SetProperty(value); }
         }
 
+        public void UpdatePrimaryTarget()
+        {
+            PrimaryTarget = StatsByUser.SelectMany(x => x.SkillLog)
+                .GroupBy(s => s.Target)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefault() as NpcEntity;
+        }
+
         private PlayerInfo GetOrCreate(SkillResult skillResult)
         {
             NpcEntity npctarget = skillResult.Target as NpcEntity;
+
+            //ignore pvp if onlybosses is ticked
+            if (OnlyBosses && npctarget == null && IsValidAttack(skillResult)) return null;
+
             if (npctarget != null)
             {
                 if (OnlyBosses)//not count bosses
@@ -158,8 +171,8 @@ namespace Tera.DamageMeter
 
         public bool IsValidAttack(SkillResult skillResult)
         {
-            return skillResult.SourcePlayer != null && (skillResult.Damage > 0) &&
-                   (skillResult.Source.Id != skillResult.Target.Id);
+            return skillResult.SourcePlayer != null && skillResult.Damage > 0 &&
+                   skillResult.Source.Id != skillResult.Target.Id;
         }
 
         private SkillStats StatsChange(SkillResult message)
