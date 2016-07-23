@@ -357,6 +357,7 @@ namespace CasualMeter
                 }
                 return;
             }
+
             if (DamageTracker.IsArchived)
             { 
                 var npcOccupier = message as SNpcOccupierInfo;
@@ -557,12 +558,19 @@ namespace CasualMeter
             }
         }
 
+        private bool IsInactiveTimerReached()
+        {
+            return SettingsHelper.Instance.Settings.InactivityResetDuration > 0 
+                && _inactivityTimer.Elapsed >
+                   TimeSpan.FromSeconds(SettingsHelper.Instance.Settings.InactivityResetDuration);
+        }
+
         private void CheckUpdate(SkillResult skillResult)
         {
-            if (PartyOnly && !(_playerTracker.MyParty(skillResult.SourcePlayer) || _playerTracker.MyParty(skillResult.TargetPlayer))) return;
-            if (SettingsHelper.Instance.Settings.InactivityResetDuration > 0
-            && _inactivityTimer.Elapsed > TimeSpan.FromSeconds(SettingsHelper.Instance.Settings.InactivityResetDuration)
-            && skillResult.IsValid())
+            if (PartyOnly &&//check if party only
+                !(_playerTracker.MyParty(skillResult.SourcePlayer) || _playerTracker.MyParty(skillResult.TargetPlayer)))
+                return;
+            if (IsInactiveTimerReached() && skillResult.IsValid())
             {
                 CasualMessenger.Instance.ResetPlayerStats(AutosaveEncounters || DamageTracker.IsArchived);
             }
