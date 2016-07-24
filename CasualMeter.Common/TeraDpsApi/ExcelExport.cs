@@ -25,7 +25,7 @@ namespace CasualMeter.Common.TeraDpsApi
                 NpcInfo boss = teraData.NpcDatabase.GetOrPlaceholder(ushort.Parse(data.areaId), uint.Parse(data.bossId));
                 var dir =
                     Path.Combine(
-                        exportType == ExportType.Excel
+                        exportType.HasFlag(ExportType.Excel)//if regular export, save in documents, otherwise temp
                             ? SettingsHelper.Instance.GetDocumentsPath()
                             : SettingsHelper.Instance.GetTempFolderPath(), $"exports/{boss.Area.Replace(":", "-")}");
                 Directory.CreateDirectory(dir);
