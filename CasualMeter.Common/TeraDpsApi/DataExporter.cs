@@ -174,7 +174,11 @@ namespace CasualMeter.Common.TeraDpsApi
                 areaId != 767 &&
                 areaId != 768 &&
                 areaId != 470 &&
-                areaId != 468
+                areaId != 468 &&
+                areaId != 770 &&
+                areaId != 769 &&
+                areaId != 969 &&
+                areaId != 970
                 )
             {
                 return;
