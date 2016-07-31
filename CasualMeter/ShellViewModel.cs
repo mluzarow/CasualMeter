@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -234,6 +235,7 @@ namespace CasualMeter
         #endregion
 
         private object _snifferLock = new object();
+        private bool _needInit;
 
         public void Initialize()
         {
@@ -270,19 +272,14 @@ namespace CasualMeter
         private void HandleNewConnection(Server server)
         {
             Server = server;
-            _teraData = BasicTeraData.DataForRegion(server.Region);
-            _entityTracker = new EntityTracker(_teraData.NpcDatabase);
-            _playerTracker = new PlayerTracker(_entityTracker,BasicTeraData.Servers);
-            _messageFactory = new MessageFactory(_teraData.OpCodeNamer, server.Region);
-
+            _messageFactory = new MessageFactory();
             ResetDamageTracker();
             DamageTracker = DamageTracker ?? new DamageTracker
             {
                 OnlyBosses = OnlyBosses,
                 IgnoreOneshots = IgnoreOneshots
             };
-            _abnormalityTracker = new AbnormalityTracker(_entityTracker, _playerTracker, _teraData.HotDotDatabase, _abnormalityStorage, CheckUpdate);
-            _charmTracker = new CharmTracker(_abnormalityTracker);
+            _needInit = true;
             Logger.Info($"Connected to server {server.Name}.");
         }
 
@@ -386,7 +383,7 @@ namespace CasualMeter
                 return;
             }
 
-            _entityTracker.Update(message);
+            _entityTracker?.Update(message);
 
             var changeHp = message as SCreatureChangeHp;
             if (changeHp != null)
@@ -527,7 +524,7 @@ namespace CasualMeter
                 return;
             }
 
-            _playerTracker.UpdateParty(message);
+            _playerTracker?.UpdateParty(message);
 
             var sSpawnUser = message as SpawnUserServerMessage;
             if (sSpawnUser != null)
@@ -548,11 +545,31 @@ namespace CasualMeter
             var sLogin = message as LoginServerMessage;
             if (sLogin != null)
             {
+                if (_needInit)
+                {
+                    Server = BasicTeraData.Servers.GetServer(sLogin.ServerId, Server);
+                    Logger.Info($"Logged in to server {Server.Name}.");
+                    _teraData = BasicTeraData.DataForRegion(Server.Region);
+                    _entityTracker = new EntityTracker(_teraData.NpcDatabase);
+                    _playerTracker = new PlayerTracker(_entityTracker, BasicTeraData.Servers);
+                    _abnormalityTracker = new AbnormalityTracker(_entityTracker, _playerTracker, _teraData.HotDotDatabase, _abnormalityStorage, CheckUpdate);
+                    _charmTracker = new CharmTracker(_abnormalityTracker);
+                    _entityTracker.Update(message);
+                    _playerTracker.UpdateParty(message);
+                    _needInit = false;
+                }
                 _abnormalityStorage.EndAll(message.Time.Ticks);
                 _abnormalityTracker = new AbnormalityTracker(_entityTracker, _playerTracker, _teraData.HotDotDatabase, _abnormalityStorage, CheckUpdate);
                 _charmTracker = new CharmTracker(_abnormalityTracker);
-                Server = BasicTeraData.Servers.GetServer(sLogin.ServerId,Server);
-                Logger.Info($"Logged in to server {Server.Name}.");
+                return;
+            }
+            var cVersion = message as C_CHECK_VERSION;
+            if (cVersion != null)
+            {
+                var opCodeNamer =
+                    new OpCodeNamer(Path.Combine(BasicTeraData.ResourceDirectory,
+                        $"opcodes/{cVersion.Versions[0]}.txt"));
+                _messageFactory = new MessageFactory(opCodeNamer, cVersion.Versions[0]);
                 return;
             }
         }
