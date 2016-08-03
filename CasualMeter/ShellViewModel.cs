@@ -372,6 +372,8 @@ namespace CasualMeter
                 }
             }
 
+            _entityTracker?.Update(message);
+
             var skillResultMessage = message as EachSkillResultServerMessage;
             if (skillResultMessage != null)
             {
@@ -382,8 +384,6 @@ namespace CasualMeter
                 }
                 return;
             }
-
-            _entityTracker?.Update(message);
 
             var changeHp = message as SCreatureChangeHp;
             if (changeHp != null)
