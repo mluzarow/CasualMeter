@@ -569,7 +569,7 @@ namespace CasualMeter
                 var opCodeNamer =
                     new OpCodeNamer(Path.Combine(BasicTeraData.ResourceDirectory,
                         $"opcodes/{cVersion.Versions[0]}.txt"));
-                _messageFactory = new MessageFactory(opCodeNamer, cVersion.Versions[0]);
+                _messageFactory = new MessageFactory(opCodeNamer, cVersion.Versions[1]);
                 return;
             }
         }
