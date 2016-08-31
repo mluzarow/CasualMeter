@@ -105,8 +105,8 @@ namespace CasualMeter.Common.TeraDpsApi
                 teradpsUser.playerClass = user.Class.ToString();
                 teradpsUser.playerName = user.Name;
                 teradpsUser.playerServer = SettingsHelper.Instance.BasicTeraData.Servers.GetServerName(user.Player.ServerId);
-                teradpsUser.playerAverageCritRate = Math.Round(100 * (double)filteredSkillog.Count(x => x.IsCritical && x.Damage > 0) / filteredSkillog.Count(x => x.Damage > 0), 1) + "";
-                teradpsUser.healCrit = user.Player.IsHealer ? Math.Round(100 * (double)filteredSkillog.Count(x => x.IsCritical && x.Heal > 0) / filteredSkillog.Count(x => x.Heal > 0), 1) + "" : null;
+                teradpsUser.playerAverageCritRate = Math.Round(100 * (double)filteredSkillog.Count(x => x.IsCritical && x.Damage > 0) / filteredSkillog.Count(x => x.Damage > 0)) + "";
+                teradpsUser.healCrit = user.Player.IsHealer ? Math.Round(100 * (double)filteredSkillog.Count(x => x.IsCritical && x.Heal > 0) / filteredSkillog.Count(x => x.Heal > 0)) + "" : null;
                 teradpsUser.playerDps = TimeSpan.TicksPerSecond * damage / interval + "";
                 teradpsUser.playerTotalDamagePercentage = damage * 100 / totaldamage + "";
 
@@ -145,8 +145,8 @@ namespace CasualMeter.Common.TeraDpsApi
 
                     skillLog.skillAverageCrit = skill.AverageCrit + "";
                     skillLog.skillAverageWhite = skill.AverageWhite + "";
-                    skillLog.skillCritRate = Math.Round(skill.CritRate * 100, 1) + "";
-                    skillLog.skillDamagePercent = Math.Round(skill.DamagePercent * 100, 1) + "";
+                    skillLog.skillCritRate = Math.Round(skill.CritRate * 100) + "";
+                    skillLog.skillDamagePercent = Math.Round(skill.DamagePercent * 100) + "";
                     skillLog.skillHighestCrit = skill.HighestCrit + "";
                     skillLog.skillHits = skill.Hits + "";
                     skillLog.skillId = teraData.SkillDatabase.GetSkillByPetName(skill.NpcInfo?.Name,user.Player.RaceGenderClass)?.Id.ToString() ?? skill.SkillId.ToString();
