@@ -179,7 +179,8 @@ namespace CasualMeter.Common.TeraDpsApi
                 areaId != 769 &&
                 areaId != 916 &&
                 areaId != 969 &&
-                areaId != 970
+                areaId != 970 &&
+                areaId != 950
                 )
             {
                 return;
@@ -203,10 +204,10 @@ namespace CasualMeter.Common.TeraDpsApi
                     using (var client = new HttpClient())
                     {
                         client.Timeout = TimeSpan.FromSeconds(30);
-                        client.DefaultRequestHeaders.Add("X-Auth-Token", SettingsHelper.Instance.Settings.TeraDpsToken);
-                        client.DefaultRequestHeaders.Add("X-User-Id", SettingsHelper.Instance.Settings.TeraDpsUser);
+                        //client.DefaultRequestHeaders.Add("X-Auth-Token", SettingsHelper.Instance.Settings.TeraDpsToken);
+                        //client.DefaultRequestHeaders.Add("X-User-Id", SettingsHelper.Instance.Settings.TeraDpsUser);
 
-                        var response = client.PostAsync("http://teradps.io/api/que", new StringContent(
+                        var response = client.PostAsync("http://moongourd.net/dpsmeter_data.php", new StringContent(
                         json,
                         Encoding.UTF8,
                         "application/json")
