@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using CasualMeter.Common.Conductors.Messages;
 using CasualMeter.Common.Entities;
 using CasualMeter.Common.Helpers;
+using CasualMeter.Common.Tools;
 using Lunyx.Common.UI.Wpf;
 using Tera.Data;
 
@@ -70,7 +71,7 @@ namespace CasualMeter.Common.TeraDpsApi
             var partyDps = TimeSpan.TicksPerSecond * totaldamage / interval;
             var teradpsData = new EncounterBase
             {
-                encounterDateTime = damageTracker.FirstAttack?.ToUniversalTime() ?? DateTime.UtcNow,
+                encounterUnixEpoch = DateTimeTools.DateTimeToUnixTimestamp(damageTracker.FirstAttack?.ToUniversalTime() ?? DateTime.UtcNow),
                 areaId = entity.Info.HuntingZoneId + "",
                 bossId = entity.Info.TemplateId + "",
                 fightDuration = seconds + "",
