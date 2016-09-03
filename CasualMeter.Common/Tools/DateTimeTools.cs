@@ -2,7 +2,7 @@
 
 namespace CasualMeter.Common.Tools
 {
-    public class DateTimeTools
+    public static class DateTimeTools
     {
         private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
 
