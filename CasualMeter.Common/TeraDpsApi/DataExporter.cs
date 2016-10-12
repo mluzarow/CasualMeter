@@ -208,7 +208,7 @@ namespace CasualMeter.Common.TeraDpsApi
                         //client.DefaultRequestHeaders.Add("X-Auth-Token", SettingsHelper.Instance.Settings.TeraDpsToken);
                         //client.DefaultRequestHeaders.Add("X-User-Id", SettingsHelper.Instance.Settings.TeraDpsUser);
 
-                        var response = client.PostAsync("http://moongourd.net/dpsmeter_data.php", new StringContent(
+                        var response = client.PostAsync("http://moongourd.com/dpsmeter_data.php", new StringContent(
                         json,
                         Encoding.UTF8,
                         "application/json")
