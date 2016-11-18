@@ -31,10 +31,10 @@ namespace CasualMeter.Common.TeraDpsApi
 
             var exportToExcel = (exportType & (ExportType.Excel | ExportType.ExcelTemp)) != 0;
             //if we're not exporting to excel and credentials aren't fully entered, return
-            if (!exportToExcel
-                && (string.IsNullOrEmpty(SettingsHelper.Instance.Settings.TeraDpsToken)
-                    || string.IsNullOrEmpty(SettingsHelper.Instance.Settings.TeraDpsUser)))
-                return;
+            //if (!exportToExcel
+            //    && (string.IsNullOrEmpty(SettingsHelper.Instance.Settings.TeraDpsToken)
+            //        || string.IsNullOrEmpty(SettingsHelper.Instance.Settings.TeraDpsUser)))
+            //    return;
 
             //ignore if not a boss
             var entity = damageTracker.PrimaryTarget;
