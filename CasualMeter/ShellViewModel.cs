@@ -344,7 +344,7 @@ namespace CasualMeter
             {
                 if (skillResultMessage.IsValid(DamageTracker))
                 {
-                    var skillResult = new SkillResult(skillResultMessage, _entityTracker, _playerTracker, _teraData.SkillDatabase);
+                    var skillResult = new SkillResult(skillResultMessage, _entityTracker, _playerTracker, _teraData.SkillDatabase, null, _abnormalityTracker);
                     CheckUpdate(skillResult);
                 }
                 return;
