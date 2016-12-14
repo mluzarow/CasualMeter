@@ -110,8 +110,12 @@ namespace CasualMeter.Tracker
                 if (OnlyBosses)//not count bosses
                     if (!npctarget.Info.Boss)
                         return null;
-                if (IgnoreOneshots)//ignore damage that is more than 10x times than mob's hp
-                    if ((npctarget.Info.HP>0) && (npctarget.Info.HP <= skillResult.Damage/10))
+                if (IgnoreOneshots)
+                    if ((npctarget.Info.HP>0)
+                        //ignore damage that is more than 10x times than mob's hp
+                        && (    npctarget.Info.HP <= skillResult.Damage/10
+                        //ignore damage over 100m on a boss
+                            ||  (npctarget.Info.Boss && skillResult.Damage > 99999999)))
                         return null;
             }
             var player = skillResult.SourcePlayer;
