@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
-using CasualMeter.Common.Helpers;
+using CasualMeter.Core.Helpers;
 using Tera.Game;
 
 namespace CasualMeter.Common.Converters

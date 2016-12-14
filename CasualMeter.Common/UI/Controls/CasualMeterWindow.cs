@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using CasualMeter.Common.Conductors;
-using CasualMeter.Common.Conductors.Messages;
-using CasualMeter.Common.Helpers;
 using CasualMeter.Common.UI.ViewModels;
+using CasualMeter.Core.Conductors;
+using CasualMeter.Core.Conductors.Messages;
+using CasualMeter.Core.Helpers;
 using log4net;
 using Lunyx.Common.UI.Wpf.Controls;
 

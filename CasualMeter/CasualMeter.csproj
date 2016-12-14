@@ -174,9 +174,9 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CloseButton.xaml.cs">
@@ -247,6 +247,14 @@
       <Project>{1f43f250-51f4-4ddf-b0db-17dcaf175cdc}</Project>
       <Name>CasualMeter.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CasualMeter.Core\CasualMeter.Core.csproj">
+      <Project>{b19904f0-f681-4547-9b21-7add8be40742}</Project>
+      <Name>CasualMeter.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CasualMeter.Tracker\CasualMeter.Tracker.csproj">
+      <Project>{d1ed4752-f2fc-44c3-97b2-580bc79f4af1}</Project>
+      <Name>CasualMeter.Tracker</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NetworkSniffer\NetworkSniffer.csproj">
       <Project>{5B431143-1A77-44FF-8BC3-926FEC8AD97C}</Project>
       <Name>NetworkSniffer</Name>
@@ -254,10 +262,6 @@
     <ProjectReference Include="..\Tera.Core\Tera.Core.csproj">
       <Project>{ee476c7c-2942-4ba4-ab47-7adbe65635fd}</Project>
       <Name>Tera.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tera.DamageMeter.Core\Tera.DamageMeter.Core.csproj">
-      <Project>{d1ed4752-f2fc-44c3-97b2-580bc79f4af1}</Project>
-      <Name>Tera.DamageMeter.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Tera.Data\Tera.Data.csproj">
       <Project>{4B6AA9BD-CEC2-4AA6-B35A-1ACB2FA7767B}</Project>

@@ -1,22 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using CasualMeter.Common.Conductors;
-using CasualMeter.Common.Conductors.Messages;
 using CasualMeter.Common.Formatters;
-using CasualMeter.Common.Helpers;
 using CasualMeter.Common.UI.ViewModels;
 using CasualMeter.Common.TeraDpsApi;
+using CasualMeter.Core.Conductors;
+using CasualMeter.Core.Conductors.Messages;
+using CasualMeter.Core.Helpers;
+using CasualMeter.Tracker;
 using GalaSoft.MvvmLight.CommandWpf;
-using Lunyx.Common.UI.Wpf;
+using Lunyx.Common.UI.Wpf.Collections;
 using NetworkSniffer;
 using Tera;
-using Tera.DamageMeter;
 using Tera.Data;
 using Tera.Game;
 using Tera.Game.Abnormality;
@@ -59,9 +58,9 @@ namespace CasualMeter
             set { SetProperty(value); }
         }
 
-        public ThreadSafeObservableCollection<DamageTracker> ArchivedDamageTrackers
+        public SyncedCollection<DamageTracker> ArchivedDamageTrackers
         {
-            get { return GetProperty(getDefault: () => new ThreadSafeObservableCollection<DamageTracker>()); }
+            get { return GetProperty(getDefault: () => CollectionHelper.Instance.CreateSyncedCollection<DamageTracker>()); }
             set { SetProperty(value); }
         }
 

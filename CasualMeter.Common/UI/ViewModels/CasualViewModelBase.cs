@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using CasualMeter.Common.Helpers;
 using log4net;
 using Lunyx.Common.UI.Wpf;
 

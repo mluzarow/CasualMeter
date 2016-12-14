@@ -4,7 +4,7 @@
                             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                             xmlns:converters="clr-namespace:CasualMeter.Common.Converters"
-                            xmlns:damageMeter="clr-namespace:Tera.DamageMeter;assembly=Tera.DamageMeter.Core"
+                            xmlns:damageMeter="clr-namespace:CasualMeter.Tracker;assembly=CasualMeter.Tracker"
                             xmlns:controls="clr-namespace:CasualMeter.Common.UI.Controls"
                             xmlns:converters1="clr-namespace:Lunyx.Common.UI.Wpf.Converters;assembly=Lunyx.Common.UI.Wpf"
                             mc:Ignorable="d"

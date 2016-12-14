@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Tera.DamageMeter;
+using CasualMeter.Tracker;
 
 namespace CasualMeter.Common.UI.Controls
 {

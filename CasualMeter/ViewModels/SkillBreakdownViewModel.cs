@@ -1,30 +1,23 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Data;
-using CasualMeter.Common;
-using CasualMeter.Common.Conductors;
-using CasualMeter.Common.Conductors.Messages;
 using CasualMeter.Common.Entities;
-using CasualMeter.Common.UI;
 using CasualMeter.Common.UI.ViewModels;
-using Lunyx.Common.UI.Wpf;
+using CasualMeter.Core.Conductors;
+using CasualMeter.Core.Conductors.Messages;
+using CasualMeter.Core.Helpers;
+using CasualMeter.Tracker;
+using Lunyx.Common.UI.Wpf.Collections;
 using Nicenis.ComponentModel;
-using Tera.DamageMeter;
 using Tera.Game;
 
 namespace CasualMeter.ViewModels
 {
     public class SkillBreakdownViewModel : CasualViewModelBase
     {
-        public ThreadSafeObservableCollection<ComboBoxEntity> ComboBoxEntities
+        public SyncedCollection<ComboBoxEntity> ComboBoxEntities
         {
-            get { return GetProperty<ThreadSafeObservableCollection<ComboBoxEntity>>(); }
+            get { return GetProperty<SyncedCollection<ComboBoxEntity>>(); }
             set { SetProperty(value); }
         }
 
@@ -62,32 +55,32 @@ namespace CasualMeter.ViewModels
             set { SetProperty(value); }
         }
 
-        public ThreadSafeObservableCollection<SkillResult> SkillLog
+        public SyncedCollection<SkillResult> SkillLog
         {
-            get { return GetProperty<ThreadSafeObservableCollection<SkillResult>>(); }
+            get { return GetProperty<SyncedCollection<SkillResult>>(); }
             set { SetProperty(value); }
         }
 
-        public ThreadSafeObservableCollection<AggregatedSkillResult> AggregatedSkillLogById
+        public SyncedCollection<AggregatedSkillResult> AggregatedSkillLogById
         {
-            get { return GetProperty(getDefault: () => new ThreadSafeObservableCollection<AggregatedSkillResult>()); }
+            get { return GetProperty(getDefault: () => CollectionHelper.Instance.CreateSyncedCollection<AggregatedSkillResult>()); }
             set { SetProperty(value); }
         }
 
-        public ThreadSafeObservableCollection<AggregatedSkillResult> AggregatedSkillLogByName
+        public SyncedCollection<AggregatedSkillResult> AggregatedSkillLogByName
         {
-            get { return GetProperty(getDefault: () => new ThreadSafeObservableCollection<AggregatedSkillResult>()); }
+            get { return GetProperty(getDefault: () => CollectionHelper.Instance.CreateSyncedCollection<AggregatedSkillResult>()); }
             set { SetProperty(value); }
         }
         
         public SkillBreakdownViewModel(PlayerInfo playerInfo)
         {
-            ComboBoxEntities = new ThreadSafeObservableCollection<ComboBoxEntity>
+            ComboBoxEntities = CollectionHelper.Instance.CreateSyncedCollection(new []
             {
                 new ComboBoxEntity(SkillViewType.FlatView, "Flat View"),
                 new ComboBoxEntity(SkillViewType.AggregatedSkillIdView, "Aggregate by Id"),
                 new ComboBoxEntity(SkillViewType.AggregatedSkillNameView, "Aggregate by Name")
-            };
+            });
 
             //NOTE: These are duplicated in the xaml because of a wpf bug
             SortDescriptionMappings = new Dictionary<SkillViewType, IList<SortDescription>>

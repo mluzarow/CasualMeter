@@ -3,18 +3,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Tera.DamageMeter;
-using Tera.Game.Messages;
 using Newtonsoft.Json;
 using Tera.Game;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using CasualMeter.Common.Conductors.Messages;
 using CasualMeter.Common.Entities;
-using CasualMeter.Common.Helpers;
 using CasualMeter.Common.Tools;
-using Lunyx.Common.UI.Wpf;
+using CasualMeter.Core.Conductors.Messages;
+using CasualMeter.Core.Helpers;
+using CasualMeter.Tracker;
+using Lunyx.Common.UI.Wpf.Collections;
 using Tera.Data;
 
 namespace CasualMeter.Common.TeraDpsApi
@@ -131,12 +130,13 @@ namespace CasualMeter.Common.TeraDpsApi
                 }
 
                 var aggregated = new List<AggregatedSkillResult>();
-                var collection = new ThreadSafeObservableCollection<SkillResult>();
+                var collection = new List<SkillResult>();
                 foreach (var skill in filteredSkillog)
                 {
                     collection.Add(skill);
                     if (aggregated.All(asr => !skill.IsSameSkillAs(asr)))
-                        aggregated.Add(new AggregatedSkillResult(skill.SkillShortName,skill.IsHeal,AggregationType.Name, collection));
+                        aggregated.Add(new AggregatedSkillResult(skill.SkillShortName, skill.IsHeal,
+                            AggregationType.Name, CollectionHelper.Instance.CreateSyncedCollection(collection)));
                 }
                 foreach (var skill in aggregated.OrderByDescending(x=>x.Damage))
                 {
