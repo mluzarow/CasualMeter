@@ -206,7 +206,7 @@
       <DependentUpon>FullPlayerInfoControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\Controls\PlayerInfoControl.cs" />
-    <Compile Include="UI\ViewModels\CasualViewModelBase.cs" />
+    <Compile Include="ViewModels\Base\CasualViewModelBase.cs" />
     <Compile Include="ViewModels\SkillBreakdownViewModel.cs" />
     <Compile Include="Views\SkillBreakdownView.xaml.cs">
       <DependentUpon>SkillBreakdownView.xaml</DependentUpon>

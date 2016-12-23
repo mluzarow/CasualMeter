@@ -6,7 +6,7 @@ using CasualMeter.Core.Conductors;
 using CasualMeter.Core.Conductors.Messages;
 using CasualMeter.Core.Helpers;
 using CasualMeter.Tracker;
-using CasualMeter.UI.ViewModels;
+using CasualMeter.ViewModels.Base;
 using Lunyx.Common.UI.Wpf.Collections;
 using Nicenis.ComponentModel;
 using Tera.Game;

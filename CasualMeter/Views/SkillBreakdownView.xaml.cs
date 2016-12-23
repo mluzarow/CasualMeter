@@ -9,7 +9,6 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using CasualMeter.Common;
 using CasualMeter.Common.Entities;
 using CasualMeter.Converters;
 using CasualMeter.Core.Conductors;

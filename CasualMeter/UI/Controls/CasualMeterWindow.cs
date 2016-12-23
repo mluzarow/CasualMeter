@@ -7,7 +7,7 @@ using System.Windows.Input;
 using CasualMeter.Core.Conductors;
 using CasualMeter.Core.Conductors.Messages;
 using CasualMeter.Core.Helpers;
-using CasualMeter.UI.ViewModels;
+using CasualMeter.ViewModels.Base;
 using log4net;
 using Lunyx.Common.UI.Wpf.Controls;
 
