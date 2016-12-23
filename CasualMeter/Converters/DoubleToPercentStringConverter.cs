@@ -1,23 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using CasualMeter.Tracker;
 
-namespace CasualMeter.Common.Converters
+namespace CasualMeter.Converters
 {
-    public class DpsToStringConverter : IValueConverter
+    public class DoubleToPercentStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value != null && !(value is long))
-                throw new ArgumentException($"Invalid arguments passed to {nameof(DpsToStringConverter)}.");
+            if (value != null && !(value is double))
+                throw new ArgumentException($"Invalid arguments passed to {nameof(DoubleToPercentStringConverter)}.");
 
             var helper = FormatHelpers.Pretty;
-            return $"{helper.FormatValue((long?) value ?? 0)}/s";
+            return helper.FormatPercent((double?) value ?? 0);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -4,14 +4,14 @@ using System.IO;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
-using CasualMeter.Common.UI.ViewModels;
 using CasualMeter.Core.Conductors;
 using CasualMeter.Core.Conductors.Messages;
 using CasualMeter.Core.Helpers;
+using CasualMeter.UI.ViewModels;
 using log4net;
 using Lunyx.Common.UI.Wpf.Controls;
 
-namespace CasualMeter.Common.UI.Controls
+namespace CasualMeter.UI.Controls
 {
     public class CasualMeterWindow : ClickThroughWindow
     {

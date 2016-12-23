@@ -2,7 +2,7 @@
 using log4net;
 using Lunyx.Common.UI.Wpf;
 
-namespace CasualMeter.Common.UI.ViewModels
+namespace CasualMeter.UI.ViewModels
 {
     public class CasualViewModelBase : ViewModelBase
     {

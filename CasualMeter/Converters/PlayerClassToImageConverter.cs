@@ -4,7 +4,7 @@ using System.Windows.Data;
 using CasualMeter.Core.Helpers;
 using Tera.Game;
 
-namespace CasualMeter.Common.Converters
+namespace CasualMeter.Converters
 {
     public class PlayerClassToImageConverter : IValueConverter
     {

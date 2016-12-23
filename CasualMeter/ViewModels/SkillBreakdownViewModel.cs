@@ -2,11 +2,11 @@
 using System.ComponentModel;
 using System.Linq;
 using CasualMeter.Common.Entities;
-using CasualMeter.Common.UI.ViewModels;
 using CasualMeter.Core.Conductors;
 using CasualMeter.Core.Conductors.Messages;
 using CasualMeter.Core.Helpers;
 using CasualMeter.Tracker;
+using CasualMeter.UI.ViewModels;
 using Lunyx.Common.UI.Wpf.Collections;
 using Nicenis.ComponentModel;
 using Tera.Game;

@@ -182,10 +182,31 @@
     <Compile Include="CloseButton.xaml.cs">
       <DependentUpon>CloseButton.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\ApplicationTitleConverter.cs" />
+    <Compile Include="Converters\BooleanToContributionBrushConverter.cs" />
+    <Compile Include="Converters\ContributionToWidthConverter.cs" />
+    <Compile Include="Converters\DateTimeToTimeSpanStringConverter.cs" />
+    <Compile Include="Converters\DoubleToPercentStringConverter.cs" />
+    <Compile Include="Converters\DpsToStringConverter.cs" />
+    <Compile Include="Converters\LongToStringConverter.cs" />
+    <Compile Include="Converters\LongToTotalDamageConverter.cs" />
+    <Compile Include="Converters\OpacityValueConverter.cs" />
+    <Compile Include="Converters\PlayerClassToImageConverter.cs" />
+    <Compile Include="Converters\SavedEncounterToStringConverter.cs" />
+    <Compile Include="Converters\TimeSpanToTotalTimeConverter.cs" />
     <Compile Include="ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ShellViewModel.cs" />
+    <Compile Include="UI\Controls\CasualMeterWindow.cs" />
+    <Compile Include="UI\Controls\CompactPlayerInfoControl.xaml.cs">
+      <DependentUpon>CompactPlayerInfoControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Controls\FullPlayerInfoControl.xaml.cs">
+      <DependentUpon>FullPlayerInfoControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Controls\PlayerInfoControl.cs" />
+    <Compile Include="UI\ViewModels\CasualViewModelBase.cs" />
     <Compile Include="ViewModels\SkillBreakdownViewModel.cs" />
     <Compile Include="Views\SkillBreakdownView.xaml.cs">
       <DependentUpon>SkillBreakdownView.xaml</DependentUpon>
@@ -205,6 +226,14 @@
     <Page Include="ShellView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Controls\CompactPlayerInfoControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\Controls\FullPlayerInfoControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\SkillBreakdownView.xaml">
       <SubType>Designer</SubType>
@@ -280,6 +309,7 @@
     <Resource Include="Resources\down-open-inverted.png" />
     <Resource Include="Resources\settings-inverted.png" />
     <Resource Include="Resources\pin-inverted.png" />
+    <Resource Include="Resources\Arrow.cur" />
     <Content Include="res\servers.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

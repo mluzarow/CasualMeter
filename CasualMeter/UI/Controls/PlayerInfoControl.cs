@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using CasualMeter.Tracker;
 
-namespace CasualMeter.Common.UI.Controls
+namespace CasualMeter.UI.Controls
 {
     public class PlayerInfoControl : Grid
     {

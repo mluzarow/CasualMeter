@@ -1,23 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Data;
 using CasualMeter.Tracker;
 
-namespace CasualMeter.Common.Converters
+namespace CasualMeter.Converters
 {
-    public class TimeSpanToTotalTimeConverter : IValueConverter
+    public class DpsToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (!(value is TimeSpan))
-                throw new ArgumentException($"Invalid arguments passed to {nameof(TimeSpanToTotalTimeConverter)}.");
-            
+            if (value != null && !(value is long))
+                throw new ArgumentException($"Invalid arguments passed to {nameof(DpsToStringConverter)}.");
+
             var helper = FormatHelpers.Pretty;
-            return $"Total time: {helper.FormatTimeSpan((TimeSpan)value)}";
+            return $"{helper.FormatValue((long?) value ?? 0)}/s";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

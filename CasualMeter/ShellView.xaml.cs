@@ -7,7 +7,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using CasualMeter.Common.UI.Controls;
+using CasualMeter.UI.Controls;
 using CasualMeter.ViewModels;
 using CasualMeter.Views;
 using System.Windows.Forms;
