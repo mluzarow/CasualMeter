@@ -60,12 +60,12 @@ namespace CasualMeter.Common.TeraDpsApi
                 totaldamage =
                     damageTracker.StatsByUser.SelectMany(x => x.SkillLog)
                         .Where(x => x.Time >= firstHit && x.Time <= lastHit)
-                        .Sum(x => x.Damage);
+                        .Sum(x => (long)x.Damage);
             else
                 totaldamage =
                     damageTracker.StatsByUser.SelectMany(x => x.SkillLog)
                         .Where(x => x.Target == entity)
-                        .Sum(x => x.Damage);
+                        .Sum(x => (long)x.Damage);
 
             var partyDps = TimeSpan.TicksPerSecond * totaldamage / interval;
             var teradpsData = new EncounterBase
