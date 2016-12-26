@@ -130,13 +130,13 @@ namespace CasualMeter.Common.TeraDpsApi
                 }
 
                 var aggregated = new List<AggregatedSkillResult>();
-                var collection = new List<SkillResult>();
+                var collection = CollectionHelper.Instance.CreateSyncedCollection(new List<SkillResult>());
                 foreach (var skill in filteredSkillog)
                 {
                     collection.Add(skill);
                     if (aggregated.All(asr => !skill.IsSameSkillAs(asr)))
                         aggregated.Add(new AggregatedSkillResult(skill.SkillShortName, skill.IsHeal,
-                            AggregationType.Name, CollectionHelper.Instance.CreateSyncedCollection(collection)));
+                            AggregationType.Name, collection));
                 }
                 foreach (var skill in aggregated.OrderByDescending(x=>x.Damage))
                 {
