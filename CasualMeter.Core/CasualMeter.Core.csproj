@@ -89,7 +89,6 @@
     <Compile Include="Entities\DefaultValueEntity.cs" />
     <Compile Include="Entities\HotKeySettings.cs" />
     <Compile Include="Entities\Settings.cs" />
-    <Compile Include="Helpers\CollectionHelper.cs" />
     <Compile Include="Helpers\HotkeyHelper.cs" />
     <Compile Include="Helpers\ProcessHelper.cs" />
     <Compile Include="Helpers\SettingsHelper.cs" />

@@ -58,9 +58,9 @@ namespace CasualMeter
             set { SetProperty(value); }
         }
 
-        public SyncedCollection<DamageTracker> ArchivedDamageTrackers
+        public SynchronizedObservableCollection<DamageTracker> ArchivedDamageTrackers
         {
-            get { return GetProperty(getDefault: () => CollectionHelper.Instance.CreateSyncedCollection<DamageTracker>()); }
+            get { return GetProperty(getDefault: () => new SynchronizedObservableCollection<DamageTracker>()); }
             set { SetProperty(value); }
         }
 

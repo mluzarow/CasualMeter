@@ -12,7 +12,7 @@ namespace CasualMeter.Tracker
     public class SkillStats : PropertyObservable
     {
         private readonly DamageTracker _tracker;
-        private readonly SyncedCollection<SkillResult> _skillLog;
+        private readonly SynchronizedObservableCollection<SkillResult> _skillLog;
 
         private bool IsPartyStats => _tracker == null || _skillLog == null;
 
@@ -23,7 +23,7 @@ namespace CasualMeter.Tracker
         /// </summary>
         /// <param name="tracker">DamageTracker used for calculations</param>
         /// <param name="skillLog">SkillLog used for calculations</param>
-        public SkillStats(DamageTracker tracker, SyncedCollection<SkillResult> skillLog)
+        public SkillStats(DamageTracker tracker, SynchronizedObservableCollection<SkillResult> skillLog)
         {
             _tracker = tracker;
             _skillLog = skillLog;

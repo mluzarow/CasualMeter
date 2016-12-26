@@ -15,9 +15,9 @@ namespace CasualMeter.ViewModels
 {
     public class SkillBreakdownViewModel : CasualViewModelBase
     {
-        public SyncedCollection<ComboBoxEntity> ComboBoxEntities
+        public SynchronizedObservableCollection<ComboBoxEntity> ComboBoxEntities
         {
-            get { return GetProperty<SyncedCollection<ComboBoxEntity>>(); }
+            get { return GetProperty<SynchronizedObservableCollection<ComboBoxEntity>>(); }
             set { SetProperty(value); }
         }
 
@@ -55,32 +55,32 @@ namespace CasualMeter.ViewModels
             set { SetProperty(value); }
         }
 
-        public SyncedCollection<SkillResult> SkillLog
+        public SynchronizedObservableCollection<SkillResult> SkillLog
         {
-            get { return GetProperty<SyncedCollection<SkillResult>>(); }
+            get { return GetProperty<SynchronizedObservableCollection<SkillResult>>(); }
             set { SetProperty(value); }
         }
 
-        public SyncedCollection<AggregatedSkillResult> AggregatedSkillLogById
+        public SynchronizedObservableCollection<AggregatedSkillResult> AggregatedSkillLogById
         {
-            get { return GetProperty(getDefault: () => CollectionHelper.Instance.CreateSyncedCollection<AggregatedSkillResult>()); }
+            get { return GetProperty(getDefault: () => new SynchronizedObservableCollection<AggregatedSkillResult>()); }
             set { SetProperty(value); }
         }
 
-        public SyncedCollection<AggregatedSkillResult> AggregatedSkillLogByName
+        public SynchronizedObservableCollection<AggregatedSkillResult> AggregatedSkillLogByName
         {
-            get { return GetProperty(getDefault: () => CollectionHelper.Instance.CreateSyncedCollection<AggregatedSkillResult>()); }
+            get { return GetProperty(getDefault: () => new SynchronizedObservableCollection<AggregatedSkillResult>()); }
             set { SetProperty(value); }
         }
         
         public SkillBreakdownViewModel(PlayerInfo playerInfo)
         {
-            ComboBoxEntities = CollectionHelper.Instance.CreateSyncedCollection(new []
+            ComboBoxEntities = new SynchronizedObservableCollection<ComboBoxEntity>
             {
                 new ComboBoxEntity(SkillViewType.FlatView, "Flat View"),
                 new ComboBoxEntity(SkillViewType.AggregatedSkillIdView, "Aggregate by Id"),
                 new ComboBoxEntity(SkillViewType.AggregatedSkillNameView, "Aggregate by Name")
-            });
+            };
 
             //NOTE: These are duplicated in the xaml because of a wpf bug
             SortDescriptionMappings = new Dictionary<SkillViewType, IList<SortDescription>>

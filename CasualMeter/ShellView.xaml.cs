@@ -34,7 +34,6 @@ namespace CasualMeter
             Task.Run(() => CleanTempFolder());
 
             //ensure initialization of helpers
-            CollectionHelper.Instance.Initialize(Dispatcher);
             SettingsHelper.Instance.Initialize();
             HotkeyHelper.Instance.Initialize();
             ProcessHelper.Instance.Initialize();

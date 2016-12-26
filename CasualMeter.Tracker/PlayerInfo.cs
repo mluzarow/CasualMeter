@@ -19,7 +19,7 @@ namespace CasualMeter.Tracker
         public string FullName => Player.FullName;
         public PlayerClass Class => Player.Class;
 
-        public SyncedCollection<SkillResult> SkillLog { get; private set; }
+        public SynchronizedObservableCollection<SkillResult> SkillLog { get; private set; }
 
         public DateTime EncounterStartTime => Tracker.FirstAttack ?? DateTime.Now;
 
@@ -30,7 +30,7 @@ namespace CasualMeter.Tracker
         {
             Tracker = tracker;
             Player = user;
-            SkillLog = CollectionHelper.Instance.CreateSyncedCollection<SkillResult>();
+            SkillLog = new SynchronizedObservableCollection<SkillResult>();
 
             Received = new SkillStats(tracker, SkillLog);
             Dealt = new SkillStats(tracker, SkillLog);

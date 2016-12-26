@@ -21,9 +21,9 @@ namespace CasualMeter.Tracker
 
         private readonly IDictionary<NpcEntity, long> _targetHitCount = new Dictionary<NpcEntity, long>();
 
-        public SyncedCollection<PlayerInfo> StatsByUser
+        public SynchronizedObservableCollection<PlayerInfo> StatsByUser
         {
-            get { return GetProperty(getDefault: () => CollectionHelper.Instance.CreateSyncedCollection<PlayerInfo>()); }
+            get { return GetProperty(getDefault: () => new SynchronizedObservableCollection<PlayerInfo>()); }
             set { SetProperty(value); }
         }
 

@@ -130,7 +130,7 @@ namespace CasualMeter.Common.TeraDpsApi
                 }
 
                 var aggregated = new List<AggregatedSkillResult>();
-                var collection = CollectionHelper.Instance.CreateSyncedCollection(new List<SkillResult>());
+                var collection = new SynchronizedObservableCollection<SkillResult>();
                 foreach (var skill in filteredSkillog)
                 {
                     collection.Add(skill);
@@ -186,10 +186,6 @@ namespace CasualMeter.Common.TeraDpsApi
                 return;
             }
 
-            //if (int.Parse(teradpsData.partyDps) < 2000000 && areaId != 468)
-            //{
-            //    return;
-            //}
             try
             {
                 using (var client = new HttpClient())
@@ -200,7 +196,7 @@ namespace CasualMeter.Common.TeraDpsApi
                     teradpsData.encounterUnixEpoch += timediff;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Debug.WriteLine("Get server time error");
                 return;
