@@ -20,12 +20,12 @@ namespace CasualMeter.Common.TeraDpsApi
 {
     public static class DataExporter
     {
-        public static void ToTeraDpsApi(ExportType exportType, DamageTracker damageTracker, TeraData teraData)
+        public static void ToTeraDpsApi(ExportType exportType, DamageTracker damageTracker, TeraData teraData, NpcEntity forcedBoss=null)
         {
             if (exportType == ExportType.None) return;
 
-            //if we want to upload, primary target must be dead
-            if (exportType.HasFlag(ExportType.Upload) && !damageTracker.IsPrimaryTargetDead)
+            //if we want to upload, primary target must be dead or it's Vergos p2/p3
+            if (exportType.HasFlag(ExportType.Upload) && !(forcedBoss!=null || damageTracker.IsPrimaryTargetDead))
                 return;
 
             var exportToExcel = (exportType & (ExportType.Excel | ExportType.ExcelTemp)) != 0;
@@ -36,7 +36,7 @@ namespace CasualMeter.Common.TeraDpsApi
             //    return;
 
             //ignore if not a boss
-            var entity = damageTracker.PrimaryTarget;
+            var entity = forcedBoss ?? damageTracker.PrimaryTarget;
             if (!(entity?.Info.Boss ?? false)) return;
 
             var abnormals = damageTracker.Abnormals;
@@ -180,7 +180,8 @@ namespace CasualMeter.Common.TeraDpsApi
                 areaId != 916 &&
                 areaId != 969 &&
                 areaId != 970 &&
-                areaId != 950
+                areaId != 710 &&
+                !(areaId == 950 && int.Parse(teradpsData.bossId) / 100 != 11)
                 )
             {
                 return;

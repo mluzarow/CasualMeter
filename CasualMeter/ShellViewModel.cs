@@ -380,6 +380,45 @@ namespace CasualMeter
                 }
                 return;
             }
+            var spawnNpc = message as SpawnNpcServerMessage;
+            if (spawnNpc != null)
+            {
+                if (spawnNpc.NpcArea == 950 && spawnNpc.NpcId == 9501)
+                {
+                    var bosses = DamageTracker.StatsByUser.SelectMany(x => x.SkillLog).Select(x => x.Target).OfType<NpcEntity>().ToList(); 
+                    var vergosPhase2Part1 = bosses.FirstOrDefault(x => x.Info.HuntingZoneId == 950 && x.Info.TemplateId == 1000);
+                    var vergosPhase2Part2 = bosses.FirstOrDefault(x => x.Info.HuntingZoneId == 950 && x.Info.TemplateId == 2000);
+                    //determine type
+                    ExportType exportType = ExportType.None;
+                    if (SettingsHelper.Instance.Settings.ExcelExport)
+                        exportType = exportType | ExportType.Excel;
+                    if (SettingsHelper.Instance.Settings.SiteExport)
+                        exportType = exportType | ExportType.Upload;
+
+                    if (exportType != ExportType.None)
+                        DataExporter.ToTeraDpsApi(exportType, DamageTracker, _teraData, vergosPhase2Part1);
+                        DataExporter.ToTeraDpsApi(exportType, DamageTracker, _teraData, vergosPhase2Part2);
+                    if (AutosaveEncounters)
+                        ResetDamageTracker(new ResetPlayerStatsMessage { ShouldSaveCurrent = true });
+                }
+                if (spawnNpc.NpcArea == 950 && spawnNpc.NpcId == 9502)
+                {
+                    var bosses = DamageTracker.StatsByUser.SelectMany(x => x.SkillLog).Select(x => x.Target).OfType<NpcEntity>().ToList();
+                    var vergosPhase3 = bosses.FirstOrDefault(x => x.Info.HuntingZoneId == 950 && x.Info.TemplateId == 3000);
+                    //determine type
+                    ExportType exportType = ExportType.None;
+                    if (SettingsHelper.Instance.Settings.ExcelExport)
+                        exportType = exportType | ExportType.Excel;
+                    if (SettingsHelper.Instance.Settings.SiteExport)
+                        exportType = exportType | ExportType.Upload;
+
+                    if (exportType != ExportType.None)
+                        DataExporter.ToTeraDpsApi(exportType, DamageTracker, _teraData, vergosPhase3);
+                    if (AutosaveEncounters)
+                        ResetDamageTracker(new ResetPlayerStatsMessage { ShouldSaveCurrent = true });
+                }
+                return;
+            }
 
             var sLogin = message as LoginServerMessage;
             if (sLogin != null)
@@ -387,7 +426,7 @@ namespace CasualMeter
                 if (_needInit)
                 {
                     Server = BasicTeraData.Servers.GetServer(sLogin.ServerId, Server);
-                    _messageFactory.Version = Server.Region;
+                    _messageFactory.Region = Server.Region;
                     Logger.Info($"Logged in to server {Server.Name}.");
                     _teraData = BasicTeraData.DataForRegion(Server.Region);
                     _entityTracker = new EntityTracker(_teraData.NpcDatabase);
@@ -406,7 +445,7 @@ namespace CasualMeter
                 var opCodeNamer =
                     new OpCodeNamer(Path.Combine(BasicTeraData.ResourceDirectory,
                         $"opcodes/{cVersion.Versions[0]}.txt"));
-                _messageFactory = new MessageFactory(opCodeNamer, Server.Region);
+                _messageFactory = new MessageFactory(opCodeNamer, Server.Region, cVersion.Versions[0]);
                 return;
             }
         }
