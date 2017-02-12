@@ -104,6 +104,7 @@ namespace CasualMeter.Common.TeraDpsApi
                 var buffs = abnormals.Get(user.Player);
                 teradpsUser.playerClass = user.Class.ToString();
                 teradpsUser.playerName = user.Name;
+                teradpsUser.guild = string.IsNullOrWhiteSpace(user.Player.GuildName) ? null : user.Player.GuildName;
                 teradpsUser.playerServer = SettingsHelper.Instance.BasicTeraData.Servers.GetServerName(user.Player.ServerId);
                 teradpsUser.playerAverageCritRate = Math.Round(100 * (double)filteredSkillog.Count(x => x.IsCritical && x.Damage > 0) / filteredSkillog.Count(x => x.Damage > 0)) + "";
                 teradpsUser.healCrit = user.Player.IsHealer ? Math.Round(100 * (double)filteredSkillog.Count(x => x.IsCritical && x.Heal > 0) / filteredSkillog.Count(x => x.Heal > 0)) + "" : null;
