@@ -193,7 +193,7 @@ namespace CasualMeter.Common.TeraDpsApi
                 using (var client = new HttpClient())
                 {
                     client.Timeout = TimeSpan.FromSeconds(40);
-                    var response = client.GetAsync("http://moongourd.com/shared/servertime");
+                    var response = client.GetAsync("https://moongourd.com/shared/servertime");
                     var timediff = (response.Result.Headers.Date.Value.UtcDateTime.Ticks - DateTime.UtcNow.Ticks) / TimeSpan.TicksPerSecond;
                     teradpsData.encounterUnixEpoch += timediff;
                 }
@@ -220,7 +220,7 @@ namespace CasualMeter.Common.TeraDpsApi
                         //client.DefaultRequestHeaders.Add("X-Auth-Token", SettingsHelper.Instance.Settings.TeraDpsToken);
                         //client.DefaultRequestHeaders.Add("X-User-Id", SettingsHelper.Instance.Settings.TeraDpsUser);
 
-                        var response = client.PostAsync("http://moongourd.com/dpsmeter_data.php", new StringContent(
+                        var response = client.PostAsync("https://moongourd.com/dpsmeter_data.php", new StringContent(
                         json,
                         Encoding.UTF8,
                         "application/json")
