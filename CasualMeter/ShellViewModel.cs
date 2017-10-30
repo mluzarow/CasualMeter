@@ -1,32 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Data;
-using System.Windows.Threading;
-using CasualMeter.Common.Conductors;
-using CasualMeter.Common.Conductors.Messages;
 using CasualMeter.Common.Formatters;
-using CasualMeter.Common.Helpers;
-using CasualMeter.Common.UI.ViewModels;
 using CasualMeter.Common.TeraDpsApi;
+using CasualMeter.Core.Conductors;
+using CasualMeter.Core.Conductors.Messages;
+using CasualMeter.Core.Helpers;
+using CasualMeter.Tracker;
+using CasualMeter.ViewModels.Base;
 using GalaSoft.MvvmLight.CommandWpf;
-using log4net;
-using Lunyx.Common.UI.Wpf;
+using Lunyx.Common.UI.Wpf.Collections;
 using NetworkSniffer;
 using Tera;
-using Tera.DamageMeter;
 using Tera.Data;
 using Tera.Game;
+using Tera.Game.Abnormality;
 using Tera.Game.Messages;
 using Tera.Sniffing;
 
@@ -39,19 +31,21 @@ namespace CasualMeter
         private MessageFactory _messageFactory;
         private EntityTracker _entityTracker;
         private PlayerTracker _playerTracker;
+        private UserLogoTracker _userLogoTracker = new UserLogoTracker();
         private AbnormalityTracker _abnormalityTracker;
-        private CharmTracker _charmTracker;
         private readonly AbnormalityStorage _abnormalityStorage = new AbnormalityStorage();
-
-        private Stopwatch _inactivityTimer = new Stopwatch();
+        private readonly Stopwatch _inactivityTimer = new Stopwatch();
 
         public ShellViewModel()
         {
             CasualMessenger.Instance.Messenger.Register<PastePlayerStatsMessage>(this, PasteStats);
             CasualMessenger.Instance.Messenger.Register<ResetPlayerStatsMessage>(this, ResetDamageTracker);
+            CasualMessenger.Instance.Messenger.Register<ExportStatsMessage>(this, ExportStats);
         }
 
         #region Properties
+
+        public string ApplicationFullName => $"Casual Meter {SettingsHelper.Instance.Version}";
 
         public BasicTeraData BasicTeraData
         {
@@ -65,9 +59,9 @@ namespace CasualMeter
             set { SetProperty(value); }
         }
 
-        public ThreadSafeObservableCollection<DamageTracker> ArchivedDamageTrackers
+        public SynchronizedObservableCollection<DamageTracker> ArchivedDamageTrackers
         {
-            get { return GetProperty(getDefault: () => new ThreadSafeObservableCollection<DamageTracker>()); }
+            get { return GetProperty(getDefault: () => new SynchronizedObservableCollection<DamageTracker>()); }
             set { SetProperty(value); }
         }
 
@@ -108,6 +102,22 @@ namespace CasualMeter
                     if (DamageTracker != null)
                     {
                         DamageTracker.OnlyBosses = value;
+                    }
+                });
+            }
+        }
+
+        public bool DetectBosses
+        {
+            get { return GetProperty(getDefault: () => SettingsHelper.Instance.Settings.DetectBosses); }
+            set
+            {
+                SetProperty(value, onChanged: e =>
+                {
+                    SettingsHelper.Instance.Settings.DetectBosses = value;
+                    if (_teraData?.NpcDatabase != null)
+                    {
+                        _teraData.NpcDatabase.DetectBosses = value;
                     }
                 });
             }
@@ -224,6 +234,7 @@ namespace CasualMeter
         #endregion
 
         private object _snifferLock = new object();
+        private bool _needInit;
 
         public void Initialize()
         {
@@ -260,19 +271,14 @@ namespace CasualMeter
         private void HandleNewConnection(Server server)
         {
             Server = server;
-            _teraData = BasicTeraData.DataForRegion(server.Region);
-            _entityTracker = new EntityTracker(_teraData.NpcDatabase);
-            _playerTracker = new PlayerTracker(_entityTracker,BasicTeraData.Servers);
-            _messageFactory = new MessageFactory(_teraData.OpCodeNamer);
-
+            _messageFactory = new MessageFactory();
             ResetDamageTracker();
             DamageTracker = DamageTracker ?? new DamageTracker
             {
                 OnlyBosses = OnlyBosses,
                 IgnoreOneshots = IgnoreOneshots
             };
-            _abnormalityTracker = new AbnormalityTracker(_entityTracker, _playerTracker, _teraData.HotDotDatabase, _abnormalityStorage, CheckUpdate);
-            _charmTracker = new CharmTracker(_abnormalityTracker);
+            _needInit = true;
             Logger.Info($"Connected to server {server.Name}.");
         }
 
@@ -280,7 +286,7 @@ namespace CasualMeter
         {
             if (Server == null) return;
 
-            bool saveEncounter = message != null && message.ShouldSaveCurrent;
+            var saveEncounter = message != null && message.ShouldSaveCurrent;
             if (saveEncounter && !DamageTracker.IsArchived && DamageTracker.StatsByUser.Count > 0 && 
                 DamageTracker.FirstAttack != null && DamageTracker.LastAttack != null)
             {
@@ -299,35 +305,22 @@ namespace CasualMeter
             {
                 OnlyBosses = OnlyBosses,
                 IgnoreOneshots = IgnoreOneshots,
-                Abnormals = _abnormalityStorage
+                Abnormals = _abnormalityStorage,
+                MeterPlayer = _playerTracker?.Me()
             };
+        }
+
+        private void ExportStats(ExportStatsMessage message)
+        {
+            if (!DamageTracker.IsArchived)
+                ResetDamageTracker(new ResetPlayerStatsMessage {ShouldSaveCurrent = true});
+            DataExporter.ToTeraDpsApi(message.ExportType, DamageTracker, _teraData);
         }
 
         private void HandleMessageReceived(Message obj)
         {
             var message = _messageFactory.Create(obj);
 
-            var despawnNpc = message as SDespawnNpc;
-            if (despawnNpc != null)
-            {
-                Entity ent = _entityTracker.GetOrPlaceholder(despawnNpc.Npc);
-                if (ent is NpcEntity)
-                {
-                    _abnormalityTracker.StopAggro(despawnNpc);
-                    _abnormalityTracker.DeleteAbnormality(despawnNpc);
-                    var npce = ent as NpcEntity;
-                    if (npce.Info.Boss && despawnNpc.Dead && !DamageTracker.IsArchived)
-                    {   //no need to do something if we didn't count any skill against this boss
-                        if (DamageTracker.StatsByUser.SelectMany(x => x.SkillLog).Any(x => x.Target == npce))
-                        {
-                            DataExporter.ToTeraDpsApi(despawnNpc, DamageTracker, _entityTracker, _teraData);
-                            DamageTracker.Name = npce.Info.Name; //Name encounter with the last dead boss
-                            if (AutosaveEncounters) CasualMessenger.Instance.ResetPlayerStats(true);
-                        }
-                    }
-                }
-                return;
-            }
             if (DamageTracker.IsArchived)
             { 
                 var npcOccupier = message as SNpcOccupierInfo;
@@ -346,194 +339,139 @@ namespace CasualMeter
                 }
             }
 
+            _entityTracker?.Update(message);
             var skillResultMessage = message as EachSkillResultServerMessage;
             if (skillResultMessage != null)
             {
                 if (skillResultMessage.IsValid(DamageTracker))
                 {
-                    var skillResult = new SkillResult(skillResultMessage, _entityTracker, _playerTracker, _teraData.SkillDatabase);
+                    var skillResult = new SkillResult(skillResultMessage, _entityTracker, _playerTracker, _teraData.SkillDatabase, null, _abnormalityTracker);
                     CheckUpdate(skillResult);
                 }
                 return;
             }
-
-            _entityTracker.Update(message);
-
-            var changeHp = message as SCreatureChangeHp;
-            if (changeHp != null)
+            _playerTracker?.UpdateParty(message);
+            _abnormalityTracker?.Update(message);
+            var despawnNpc = message as SDespawnNpc;
+            if (despawnNpc != null)
             {
-                _abnormalityTracker.Update(changeHp);
+                Entity ent = _entityTracker.GetOrPlaceholder(despawnNpc.Npc);
+                if (ent is NpcEntity)
+                {
+                    var npce = ent as NpcEntity;
+                    if (npce.Info.Boss && despawnNpc.Dead && !DamageTracker.IsArchived)
+                    {   //no need to do something if we didn't count any skill against this boss
+                        if (DamageTracker.StatsByUser.SelectMany(x => x.SkillLog).Any(x => x.Target == npce))
+                        {
+                            DamageTracker.PrimaryTarget = npce; //Name encounter with the last dead boss
+                            DamageTracker.IsPrimaryTargetDead = despawnNpc.Dead;
+
+                            //determine type
+                            ExportType exportType = ExportType.None;
+                            if (SettingsHelper.Instance.Settings.ExcelExport)
+                                exportType = exportType | ExportType.Excel;
+                            if (SettingsHelper.Instance.Settings.SiteExport)
+                                exportType = exportType | ExportType.Upload;
+
+                            if (exportType != ExportType.None)
+                                DataExporter.ToTeraDpsApi(exportType, DamageTracker, _teraData);
+                            if (AutosaveEncounters)
+                                ResetDamageTracker(new ResetPlayerStatsMessage { ShouldSaveCurrent = true });
+                        }
+                    }
+                }
                 return;
             }
-
-            var pchangeHp = message as SPartyMemberChangeHp;
-            if (pchangeHp != null)
+            var spawnNpc = message as SpawnNpcServerMessage;
+            if (spawnNpc != null)
             {
-                var user = _playerTracker.GetOrNull(pchangeHp.ServerId, pchangeHp.PlayerId);
-                if(user==null) return;
-                _abnormalityTracker.RegisterSlaying(user.User, pchangeHp.Slaying, pchangeHp.Time.Ticks);
-                return;
-            }
+                if (spawnNpc.NpcArea == 950 && spawnNpc.NpcId == 9501)
+                {
+                    var bosses = DamageTracker.StatsByUser.SelectMany(x => x.SkillLog).Select(x => x.Target).OfType<NpcEntity>().ToList(); 
+                    var vergosPhase2Part1 = bosses.FirstOrDefault(x => x.Info.HuntingZoneId == 950 && x.Info.TemplateId == 1000);
+                    var vergosPhase2Part2 = bosses.FirstOrDefault(x => x.Info.HuntingZoneId == 950 && x.Info.TemplateId == 2000);
+                    //determine type
+                    ExportType exportType = ExportType.None;
+                    if (SettingsHelper.Instance.Settings.ExcelExport)
+                        exportType = exportType | ExportType.Excel;
+                    if (SettingsHelper.Instance.Settings.SiteExport)
+                        exportType = exportType | ExportType.Upload;
 
-            var pmstatupd = message as S_PARTY_MEMBER_STAT_UPDATE;
-            if (pmstatupd != null)
-            {
-                var user = _playerTracker.GetOrNull(pmstatupd.ServerId, pmstatupd.PlayerId);
-                if (user == null) return;
-                _abnormalityTracker.RegisterSlaying(user.User, pmstatupd.Slaying, pmstatupd.Time.Ticks);
-                return;
-            }
+                    if (exportType != ExportType.None)
+                        DataExporter.ToTeraDpsApi(exportType, DamageTracker, _teraData, vergosPhase2Part1);
+                        DataExporter.ToTeraDpsApi(exportType, DamageTracker, _teraData, vergosPhase2Part2);
+                    if (AutosaveEncounters)
+                        ResetDamageTracker(new ResetPlayerStatsMessage { ShouldSaveCurrent = true });
+                }
+                if (spawnNpc.NpcArea == 950 && spawnNpc.NpcId == 9502)
+                {
+                    var bosses = DamageTracker.StatsByUser.SelectMany(x => x.SkillLog).Select(x => x.Target).OfType<NpcEntity>().ToList();
+                    var vergosPhase3 = bosses.FirstOrDefault(x => x.Info.HuntingZoneId == 950 && x.Info.TemplateId == 3000);
+                    //determine type
+                    ExportType exportType = ExportType.None;
+                    if (SettingsHelper.Instance.Settings.ExcelExport)
+                        exportType = exportType | ExportType.Excel;
+                    if (SettingsHelper.Instance.Settings.SiteExport)
+                        exportType = exportType | ExportType.Upload;
 
-            var pstatupd = message as S_PLAYER_STAT_UPDATE;
-            if (pstatupd != null)
-            {
-                _abnormalityTracker.RegisterSlaying(_entityTracker.MeterUser, pstatupd.Slaying, pstatupd.Time.Ticks);
-                return;
-            }
-
-            var changeMp = message as SPlayerChangeMp;
-            if (changeMp != null)
-            {
-                _abnormalityTracker.Update(changeMp);
-                return;
-            }
-
-            var npcStatus = message as SNpcStatus;
-            if (npcStatus != null)
-            {
-                _abnormalityTracker.RegisterNpcStatus(npcStatus);
-                return;
-            }
-
-            var dead = message as SCreatureLife;
-            if (dead != null)
-            {
-                _abnormalityTracker.RegisterDead(dead);
-                return;
-            }
-
-            var abnormalityBegin = message as SAbnormalityBegin;
-            if (abnormalityBegin != null)
-            {
-                _abnormalityTracker.AddAbnormality(abnormalityBegin);
-                return;
-            }
-
-            var abnormalityEnd = message as SAbnormalityEnd;
-            if (abnormalityEnd != null)
-            {
-                _abnormalityTracker.DeleteAbnormality(abnormalityEnd);
-                return;
-            }
-
-            var abnormalityRefresh = message as SAbnormalityRefresh;
-            if (abnormalityRefresh != null)
-            {
-                _abnormalityTracker.RefreshAbnormality(abnormalityRefresh);
+                    if (exportType != ExportType.None)
+                        DataExporter.ToTeraDpsApi(exportType, DamageTracker, _teraData, vergosPhase3);
+                    if (AutosaveEncounters)
+                        ResetDamageTracker(new ResetPlayerStatsMessage { ShouldSaveCurrent = true });
+                }
                 return;
             }
 
-            var despawnUser = message as SDespawnUser;
-            if (despawnUser != null)
-            {
-                _charmTracker.CharmReset(despawnUser.User, new List<CharmStatus>(), despawnUser.Time.Ticks);
-                _abnormalityTracker.DeleteAbnormality(despawnUser);
-                return;
-            }
-
-            var charmEnable = message as SEnableCharmStatus;
-            if (charmEnable != null)
-            {
-                _charmTracker.CharmEnable(_entityTracker.MeterUser.Id, charmEnable.CharmId, charmEnable.Time.Ticks);
-                return;
-            }
-            var pcharmEnable = message as SPartyMemberCharmEnable;
-            if (pcharmEnable != null)
-            {
-                var player = _playerTracker.GetOrNull(pcharmEnable.ServerId, pcharmEnable.PlayerId);
-                if (player == null) return;
-                _charmTracker.CharmEnable(player.User.Id, pcharmEnable.CharmId, pcharmEnable.Time.Ticks);
-                return;
-            }
-            var charmReset = message as SResetCharmStatus;
-            if (charmReset != null)
-            {
-                _charmTracker.CharmReset(charmReset.TargetId, charmReset.Charms, charmReset.Time.Ticks);
-                return;
-            }
-            var pcharmReset = message as SPartyMemberCharmReset;
-            if (pcharmReset != null)
-            {
-                var player = _playerTracker.GetOrNull(pcharmReset.ServerId, pcharmReset.PlayerId);
-                if (player == null) return;
-                _charmTracker.CharmReset(player.User.Id, pcharmReset.Charms, pcharmReset.Time.Ticks);
-                return;
-            }
-            var charmDel = message as SRemoveCharmStatus;
-            if (charmDel != null)
-            {
-                _charmTracker.CharmDel(_entityTracker.MeterUser.Id, charmDel.CharmId, charmDel.Time.Ticks);
-                return;
-            }
-            var pcharmDel = message as SPartyMemberCharmDel;
-            if (pcharmDel != null)
-            {
-                var player = _playerTracker.GetOrNull(pcharmDel.ServerId, pcharmDel.PlayerId);
-                if (player == null) return;
-                _charmTracker.CharmDel(player.User.Id, pcharmDel.CharmId, pcharmDel.Time.Ticks);
-                return;
-            }
-            var charmAdd = message as SAddCharmStatus;
-            if (charmAdd != null)
-            {
-                _charmTracker.CharmAdd(charmAdd.TargetId, charmAdd.CharmId, charmAdd.Status, charmAdd.Time.Ticks);
-                return;
-            }
-            var pcharmAdd = message as SPartyMemberCharmAdd;
-            if (pcharmAdd != null)
-            {
-                var player = _playerTracker.GetOrNull(pcharmAdd.ServerId, pcharmAdd.PlayerId);
-                if (player == null) return;
-                _charmTracker.CharmAdd(player.User.Id, pcharmAdd.CharmId, pcharmAdd.Status, pcharmAdd.Time.Ticks);
-                return;
-            }
-
-            _playerTracker.UpdateParty(message);
-
-            var sSpawnUser = message as SpawnUserServerMessage;
-            if (sSpawnUser != null)
-            {
-                _abnormalityTracker.RegisterDead(sSpawnUser.Id, sSpawnUser.Time.Ticks, sSpawnUser.Dead);
-                //Debug.WriteLine(sSpawnUser.Name + " : " + BitConverter.ToString(BitConverter.GetBytes(sSpawnUser.Id.Id)) + " : " + BitConverter.ToString(BitConverter.GetBytes(sSpawnUser.ServerId)) + " " + BitConverter.ToString(BitConverter.GetBytes(sSpawnUser.PlayerId)));
-                return;
-            }
-            var spawnMe = message as SpawnMeServerMessage;
-            if (spawnMe != null)
-            {
-                _abnormalityStorage.EndAll(message.Time.Ticks);
-                _abnormalityTracker = new AbnormalityTracker(_entityTracker, _playerTracker, _teraData.HotDotDatabase, _abnormalityStorage, CheckUpdate);
-                _charmTracker = new CharmTracker(_abnormalityTracker);
-                _abnormalityTracker.RegisterDead(spawnMe.Id, spawnMe.Time.Ticks, spawnMe.Dead);
-                return;
-            }
             var sLogin = message as LoginServerMessage;
             if (sLogin != null)
             {
+                if (_needInit)
+                {
+                    Server = BasicTeraData.Servers.GetServer(sLogin.ServerId, Server);
+                    _messageFactory.Region = Server.Region;
+                    Logger.Info($"Logged in to server {Server.Name}.");
+                    _teraData = BasicTeraData.DataForRegion(Server.Region);
+                    _entityTracker = new EntityTracker(_teraData.NpcDatabase, _userLogoTracker);
+                    _playerTracker = new PlayerTracker(_entityTracker, BasicTeraData.Servers);
+                    _abnormalityTracker = new AbnormalityTracker(_entityTracker, _playerTracker, _teraData.HotDotDatabase, _abnormalityStorage, CheckUpdate);
+                    _entityTracker.Update(message);
+                    if (!DamageTracker.IsArchived) DamageTracker.MeterPlayer = _playerTracker.Me();
+                    _needInit = false;
+                }
                 _abnormalityStorage.EndAll(message.Time.Ticks);
                 _abnormalityTracker = new AbnormalityTracker(_entityTracker, _playerTracker, _teraData.HotDotDatabase, _abnormalityStorage, CheckUpdate);
-                _charmTracker = new CharmTracker(_abnormalityTracker);
-                Server = BasicTeraData.Servers.GetServer(sLogin.ServerId,Server);
-                Logger.Info($"Logged in to server {Server.Name}.");
+                return;
+            }
+            var cVersion = message as C_CHECK_VERSION;
+            if (cVersion != null)
+            {
+                var opCodeNamer =
+                    new OpCodeNamer(Path.Combine(BasicTeraData.ResourceDirectory,
+                        $"opcodes/{cVersion.Versions[0]}.txt"));
+                _messageFactory = new MessageFactory(opCodeNamer, Server.Region, cVersion.Versions[0]);
+                return;
+            }
+            var sGetUserList = message as S_GET_USER_LIST;
+            if (sGetUserList != null)
+            {
+                _userLogoTracker.SetUserList(sGetUserList);
                 return;
             }
         }
 
+        private bool IsInactiveTimerReached()
+        {
+            return SettingsHelper.Instance.Settings.InactivityResetDuration > 0 
+                && _inactivityTimer.Elapsed >
+                   TimeSpan.FromSeconds(SettingsHelper.Instance.Settings.InactivityResetDuration);
+        }
+
         private void CheckUpdate(SkillResult skillResult)
         {
-            if (PartyOnly && !(_playerTracker.MyParty(skillResult.SourcePlayer) || _playerTracker.MyParty(skillResult.TargetPlayer))) return;
-            if (SettingsHelper.Instance.Settings.InactivityResetDuration > 0
-            && _inactivityTimer.Elapsed > TimeSpan.FromSeconds(SettingsHelper.Instance.Settings.InactivityResetDuration)
-            && skillResult.IsValid())
+            if (PartyOnly &&//check if party only
+                !(_playerTracker.MyParty(skillResult.SourcePlayer) || _playerTracker.MyParty(skillResult.TargetPlayer)))
+                return;
+            if (IsInactiveTimerReached() && skillResult.IsValid())
             {
                 CasualMessenger.Instance.ResetPlayerStats(AutosaveEncounters || DamageTracker.IsArchived);
             }

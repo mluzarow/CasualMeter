@@ -1,30 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using CasualMeter.Common.Conductors;
-using CasualMeter.Common.Conductors.Messages;
-using CasualMeter.Common.Helpers;
-using CasualMeter.Common.UI.Controls;
+using CasualMeter.UI.Controls;
 using CasualMeter.ViewModels;
 using CasualMeter.Views;
-using Lunyx.Common;
-using Lunyx.Common.UI.Wpf.Extensions;
-using Tera.DamageMeter;
 using System.Windows.Forms;
+using CasualMeter.Core.Helpers;
 using Microsoft.Win32;
 
 namespace CasualMeter
@@ -43,6 +30,9 @@ namespace CasualMeter
 
         protected override void OnInitialized(EventArgs e)
         {
+            //clean up temp folder in background in case app was force closed
+            Task.Run(() => CleanTempFolder());
+
             //ensure initialization of helpers
             SettingsHelper.Instance.Initialize();
             HotkeyHelper.Instance.Initialize();
@@ -77,6 +67,41 @@ namespace CasualMeter
             SettingsHelper.Instance.Save();
         }
 
+        private void CleanTempFolder()
+        {
+            var tempDirPath = SettingsHelper.Instance.GetTempFolderPath();
+            if (Directory.Exists(tempDirPath))
+            {
+                try
+                {
+                    DeleteDirectory(tempDirPath);
+                }
+                catch
+                {
+                    // eat this
+                }
+            }    
+        }
+
+        private void DeleteDirectory(string targetDir)
+        {
+            string[] files = Directory.GetFiles(targetDir);
+            string[] dirs = Directory.GetDirectories(targetDir);
+
+            foreach (string file in files)
+            {
+                File.SetAttributes(file, FileAttributes.Normal);
+                File.Delete(file);
+            }
+
+            foreach (string dir in dirs)
+            {
+                DeleteDirectory(dir);
+            }
+
+            Directory.Delete(targetDir, false);
+        }
+
         /// <summary>
         /// Fixes the Top position of the Window.
         /// bug: this needs to happen when resuming Windows and unlocking the computer
@@ -99,6 +124,7 @@ namespace CasualMeter
         private void Exit_OnClick(object sender, RoutedEventArgs e)
         {
             SaveUiSettings();
+            CleanTempFolder();
             Close();
         }
 

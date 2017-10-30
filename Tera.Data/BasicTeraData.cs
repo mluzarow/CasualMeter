@@ -7,13 +7,14 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using LibGit2Sharp;
 using Tera.Game;
 
 namespace Tera.Data
 {
     public class BasicTeraData
     {
-        public string ResourceDirectory { get; private set; }
+        public string ResourceDirectory { get; }
         public ServerDatabase Servers { get; private set; }
         public IconsDatabase Icons { get; private set; }
         public string Language { get; private set; }
@@ -25,13 +26,13 @@ namespace Tera.Data
             return _dataForRegion(region);
         }
 
-        public BasicTeraData(string overridesDirectory,string language)
+        public BasicTeraData(string overridesDirectory,string language, bool detectBosses)
         {
+            _overridesDirectory = overridesDirectory;
             ResourceDirectory = FindResourceDirectory();
             Language = language;
             Icons=new IconsDatabase(ResourceDirectory);
-            _overridesDirectory = overridesDirectory;
-            _dataForRegion = Helpers.Memoize<string, TeraData>(region => new TeraData(this, region));
+            _dataForRegion = Helpers.Memoize<string, TeraData>(region => new TeraData(this, region, detectBosses));
             LoadServers();
         }
 
@@ -48,17 +49,23 @@ namespace Tera.Data
 
         }
 
-        private static string FindResourceDirectory()
+        private string FindResourceDirectory()
         {
-            var directory = Path.GetDirectoryName(typeof(BasicTeraData).Assembly.Location);
-            while (directory != null)
+            var resourceDirectory = Path.Combine(_overridesDirectory, @"res\");
+            if (!Directory.Exists(resourceDirectory))
             {
-                var resourceDirectory = Path.Combine(directory, @"res\");
-                if (Directory.Exists(resourceDirectory))
-                    return resourceDirectory;
-                directory = Path.GetDirectoryName(directory);
+                //clone git repo if it doesn't already exist
+                Repository.Clone(@"git://github.com/neowutran/TeraDpsMeterData.git", resourceDirectory);
             }
-            throw new InvalidOperationException("Could not find the resource directory");
+            else
+            {   //if we already have the repo, just update it
+                using (var repo = new Repository(resourceDirectory))
+                {
+                    Commands.Pull(repo, new Signature("guest", "guest", DateTimeOffset.Now), new PullOptions());
+                }
+            }
+
+            return resourceDirectory;
         }
 
         private static IEnumerable<Server> GetServers(string filename)

@@ -46,7 +46,7 @@
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>1</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -174,18 +174,39 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CloseButton.xaml.cs">
       <DependentUpon>CloseButton.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Converters\ApplicationTitleConverter.cs" />
+    <Compile Include="Converters\BooleanToContributionBrushConverter.cs" />
+    <Compile Include="Converters\ContributionToWidthConverter.cs" />
+    <Compile Include="Converters\DateTimeToTimeSpanStringConverter.cs" />
+    <Compile Include="Converters\DoubleToPercentStringConverter.cs" />
+    <Compile Include="Converters\DpsToStringConverter.cs" />
+    <Compile Include="Converters\LongToStringConverter.cs" />
+    <Compile Include="Converters\LongToTotalDamageConverter.cs" />
+    <Compile Include="Converters\OpacityValueConverter.cs" />
+    <Compile Include="Converters\PlayerClassToImageConverter.cs" />
+    <Compile Include="Converters\SavedEncounterToStringConverter.cs" />
+    <Compile Include="Converters\TimeSpanToTotalTimeConverter.cs" />
     <Compile Include="ShellView.xaml.cs">
       <DependentUpon>ShellView.xaml</DependentUpon>
     </Compile>
     <Compile Include="ShellViewModel.cs" />
+    <Compile Include="UI\Controls\CasualMeterWindow.cs" />
+    <Compile Include="UI\Controls\CompactPlayerInfoControl.xaml.cs">
+      <DependentUpon>CompactPlayerInfoControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Controls\FullPlayerInfoControl.xaml.cs">
+      <DependentUpon>FullPlayerInfoControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\Controls\PlayerInfoControl.cs" />
+    <Compile Include="ViewModels\Base\CasualViewModelBase.cs" />
     <Compile Include="ViewModels\SkillBreakdownViewModel.cs" />
     <Compile Include="Views\SkillBreakdownView.xaml.cs">
       <DependentUpon>SkillBreakdownView.xaml</DependentUpon>
@@ -205,6 +226,14 @@
     <Page Include="ShellView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\Controls\CompactPlayerInfoControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\Controls\FullPlayerInfoControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\SkillBreakdownView.xaml">
       <SubType>Designer</SubType>
@@ -247,6 +276,14 @@
       <Project>{1f43f250-51f4-4ddf-b0db-17dcaf175cdc}</Project>
       <Name>CasualMeter.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CasualMeter.Core\CasualMeter.Core.csproj">
+      <Project>{b19904f0-f681-4547-9b21-7add8be40742}</Project>
+      <Name>CasualMeter.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CasualMeter.Tracker\CasualMeter.Tracker.csproj">
+      <Project>{d1ed4752-f2fc-44c3-97b2-580bc79f4af1}</Project>
+      <Name>CasualMeter.Tracker</Name>
+    </ProjectReference>
     <ProjectReference Include="..\NetworkSniffer\NetworkSniffer.csproj">
       <Project>{5B431143-1A77-44FF-8BC3-926FEC8AD97C}</Project>
       <Name>NetworkSniffer</Name>
@@ -254,10 +291,6 @@
     <ProjectReference Include="..\Tera.Core\Tera.Core.csproj">
       <Project>{ee476c7c-2942-4ba4-ab47-7adbe65635fd}</Project>
       <Name>Tera.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Tera.DamageMeter.Core\Tera.DamageMeter.Core.csproj">
-      <Project>{d1ed4752-f2fc-44c3-97b2-580bc79f4af1}</Project>
-      <Name>Tera.DamageMeter.Core</Name>
     </ProjectReference>
     <ProjectReference Include="..\Tera.Data\Tera.Data.csproj">
       <Project>{4B6AA9BD-CEC2-4AA6-B35A-1ACB2FA7767B}</Project>
@@ -276,129 +309,7 @@
     <Resource Include="Resources\down-open-inverted.png" />
     <Resource Include="Resources\settings-inverted.png" />
     <Resource Include="Resources\pin-inverted.png" />
-    <Content Include="res\servers.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\icons.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\hotdot\hotdot-EU-EN.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\hotdot\hotdot-EU-FR.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\hotdot\hotdot-EU-GER.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\hotdot\hotdot-JP.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\hotdot\hotdot-KR.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\hotdot\hotdot-NA.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\hotdot\hotdot-RU.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\hotdot\hotdot-TW.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\monsters\monsters-override.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\monsters\monsters-EU-EN.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\monsters\monsters-EU-FR.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\monsters\monsters-EU-GER.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\monsters\monsters-JP.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\monsters\monsters-KR.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\monsters\monsters-NA.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\monsters\monsters-RU.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\monsters\monsters-TW.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\opcodes\opcodes-EU.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\opcodes\opcodes-JP.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\opcodes\opcodes-KR.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\opcodes\opcodes-NA.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\opcodes\opcodes-RU.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\opcodes\opcodes-TW.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-EU-EN.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-EU-FR.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-EU-GER.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-JP.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-KR.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-NA.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-RU.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-TW.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-override-EU-EN.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-override-EU-FR.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-override-EU-GER.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-override-JP.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-override-KR.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-override-NA.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-override-RU.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\skills\skills-override-TW.tsv">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Resource Include="Resources\Arrow.cur" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.1">
@@ -412,49 +323,17 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="res\class-icons\archer.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\class-icons\berserker.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\class-icons\common.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\class-icons\gunner.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\class-icons\lancer.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\class-icons\mystic.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\class-icons\priest.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\class-icons\reaper.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\class-icons\slayer.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\class-icons\sorcerer.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\class-icons\warrior.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\class-icons\brawler.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="res\class-icons\ninja.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>cd $(TargetDir)
+rmdir /s /q "git"
+rmdir /s /q "lib\linux"
+rmdir /s /q "lib\osx"
+del /q "lib\win32\x64\*.pdb"
+del /q "lib\win32\x86\*.pdb"
+rename lib git</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
